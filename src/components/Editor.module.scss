@@ -1,0 +1,39 @@
+@import "../styles/variables.scss";
+
+.container {
+  .resizable {
+    position: relative;
+    z-index: 1;
+  }
+
+  .topbar {
+    background-color: $main-color;
+    display: flex;
+    justify-content: space-between;
+    z-index: 2;
+    overflow: visible;
+
+    button {
+      cursor: pointer;
+      border: none;
+      font-weight: bold;
+      background-color: rgba(0, 0, 0, 0);
+      img {
+        height: 100%;
+        transition: 0.2s transform ease-in-out;
+      }
+      img:hover {
+        transform: scale(2.2);
+      }
+    }
+  }
+}
+
+.resizer {
+  position: absolute;
+  cursor: col-resize;
+  height: 100%;
+  right: 0;
+  top: 0;
+  width: 5%;
+}

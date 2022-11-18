@@ -1,0 +1,102 @@
+@import "../styles/variables.scss";
+
+.article {
+  width: $item-width;
+  height: $item-height;
+  background-color: $main-color-light;
+  user-select: none;
+  display: flex;
+  flex-direction: column;
+  border-radius: $item-border-radius;
+
+  .button {
+    border: none;
+    background-color: rgba(0, 0, 0, 0);
+    cursor: pointer;
+    transition: transform 0.2s ease-in-out;
+  }
+
+  .button:hover {
+    transform: scale(1.05);
+  }
+
+  & h3 {
+    background-color: $main-color-dark;
+    color: $main-color-ultralight;
+    margin: 0;
+    padding: 5px 0;
+    text-align: center;
+    border-top-left-radius: $item-border-radius;
+    border-top-right-radius: $item-border-radius;
+  }
+
+  & > div {
+    position: relative;
+    height: 100%;
+
+    .content {
+      background-color: $main-color-light;
+      height: calc(100% - $item-footer-height - 10px);
+      position: relative;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin: 5px;
+      p {
+        margin: 0;
+      }
+
+      .edit {
+        position: absolute;
+        left: 0;
+        top: 0;
+      }
+
+      .delete {
+        position: absolute;
+        right: 0;
+        top: 0;
+      }
+
+      .languagesContainer {
+        position: absolute;
+        right: 0;
+        bottom: 0;
+        display: flex;
+        gap: 10px;
+        margin-right: 5px;
+
+        img {
+          height: 25px;
+        }
+      }
+    }
+
+    .footer {
+      padding: 0 5px;
+      height: $item-footer-height;
+      background-color: $main-color;
+
+      border-bottom-left-radius: $item-border-radius;
+      border-bottom-right-radius: $item-border-radius;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      & > div {
+        display: flex;
+        align-items: center;
+        font-size: 16px;
+
+        & > img {
+          width: 22px;
+          margin-right: 5px;
+        }
+      }
+
+      .hiddenButton {
+        width: 22px;
+        margin-right: 5px;
+      }
+    }
+  }
+}

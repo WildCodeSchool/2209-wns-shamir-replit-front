@@ -1,0 +1,54 @@
+@import "../styles/variables.scss";
+
+.section {
+  h2 {
+    display: flex;
+    align-items: center;
+    .arrowDown {
+      width: 50px;
+      height: 50px;
+    }
+
+    span {
+      font-size: 20px;
+      color: $main-color-dark;
+    }
+  }
+
+  .projectsContainer {
+    padding: 10px;
+    display: flex;
+    gap: 20px;
+
+    .newProject {
+      background-color: $main-color-ultralight;
+      cursor: pointer;
+      width: $item-width;
+      height: $item-height;
+      border: 5px dashed $main-color-dark;
+      border-radius: $item-border-radius;
+
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+
+      transition: filter 0.3s ease-in-out;
+
+      .addIcon {
+        width: 70px;
+      }
+
+      & span {
+        margin-top: 10px;
+        color: $main-color-dark;
+        font-size: 24px;
+        font-weight: bold;
+      }
+    }
+
+    .newProject:hover {
+      filter: brightness(0.9);
+    }
+  }
+}

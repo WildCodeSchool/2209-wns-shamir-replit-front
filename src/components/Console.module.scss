@@ -1,0 +1,150 @@
+@import url("https://fonts.googleapis.com/css2?family=Ubuntu+Mono&display=swap");
+
+.container {
+  width: 100%;
+  height: auto;
+  flex-grow: 1;
+  background-color: black;
+  font-size: 19px;
+  font-family: "Ubuntu Mono", monospace;
+  padding-top: 4px;
+  overflow-wrap: break-word;
+  overflow-y: auto;
+
+  p {
+    margin: 2px 0;
+    padding-left: 12px;
+  }
+
+  .log {
+    color: white;
+  }
+  .info {
+    color: lightblue;
+    background-color: rgb(0, 47, 76);
+  }
+
+  .warn {
+    color: rgb(253, 181, 47);
+    background-color: rgb(99, 46, 0);
+  }
+
+  .error {
+    color: rgb(255, 78, 78);
+    background-color: rgb(99, 0, 0);
+  }
+}
+
+// CUSTOM SCROLL
+
+// Tutorial => short.zkreations.com/m9CWPN
+
+@mixin scroll-style(
+  $size: 10px,
+  $thumb: none,
+  $thumb-color: grey,
+  $thumb-radius: 10px,
+  $track-color: transparent,
+  $track-radius: 10px
+) {
+  // Respaldo para Firefox
+  scrollbar-color: $thumb-color $track-color;
+  scrollbar-width: thin;
+
+  // Navegadores basados en webkit
+  &::-webkit-scrollbar {
+    width: $size;
+    height: $size;
+    &-track {
+      background-color: $track-color;
+      border-radius: $track-radius;
+    }
+    &-thumb {
+      background-color: $thumb-color;
+      background-image: $thumb;
+      border-radius: $thumb-radius;
+    }
+  }
+}
+
+.scroll {
+  @include scroll-style(
+    $size: var(--scroll-size, 10px),
+    $thumb: var(--scroll-thumb, none),
+    $thumb-color: var(--scroll-thumb-color, grey),
+    $thumb-radius: var(--scroll-thumb-radius, var(--scroll-radius)),
+    $track-color: var(--scroll-track, transparent),
+    $track-radius: var(--scroll-track-radius, var(--scroll-radius))
+  );
+
+  // Ejemplo 1
+  &-1 {
+    --scroll-size: 10px;
+    --scroll-radius: 10px;
+    --scroll-track: rgb(0 0 0 / 40%);
+    --scroll-thumb-color: #dfdfdf;
+  }
+
+  // Ejemplo 2
+  &-2 {
+    --scroll-size: 8px;
+    --scroll-radius: 10px;
+    --scroll-track: #009d9820;// rgb(255 255 255 / 10%);
+    --scroll-thumb-color: #009d98dd;;  // rgb(0 0 0 / 80%);
+  }
+
+  // Ejemplo 3
+  &-3 {
+    --scroll-size: 5px;
+    --scroll-radius: 10px;
+    --scroll-track: rgb(255 255 255 / 10%);
+    --scroll-thumb-color: #fff;
+  }
+
+  // Ejemplo 4
+  &-4 {
+    $bg-mask: rgb(255 255 255 / 25%);
+    --scroll-size: 12px;
+    --scroll-radius: 20px;
+    --scroll-track: rgb(0 0 0 / 40%);
+    --scroll-thumb: linear-gradient(
+      45deg,
+      #{$bg-mask} 20%,
+      transparent 20%,
+      transparent 40%,
+      #{$bg-mask} 40%,
+      #{$bg-mask} 60%,
+      transparent 60%,
+      transparent 80%,
+      #{$bg-mask} 80%
+    );
+    --scroll-thumb-color: $main-color;
+  }
+
+  // Ejemplo 5
+  &-5 {
+    --scroll-size: 15px;
+    --scroll-radius: 20px;
+    --scroll-track: rgb(255 255 255 / 10%);
+    --scroll-thumb: linear-gradient(45deg, #00aeff, #a68eff);
+  }
+
+  // Ejemplo 6
+  &-6 {
+    $bg-mask: rgb(255 255 255 / 30%);
+    --scroll-size: 12px;
+    --scroll-radius: 20px;
+    --scroll-track: rgb(0 0 0 / 40%);
+    --scroll-thumb: linear-gradient(
+      #{$bg-mask} 20%,
+      transparent 20%,
+      transparent 40%,
+      #{$bg-mask} 40%,
+      #{$bg-mask} 60%,
+      transparent 60%,
+      transparent 80%,
+      #{$bg-mask} 80%
+    );
+    --scroll-thumb-color: #10b981;
+  }
+}
