@@ -4,12 +4,17 @@ import { BrowserRouter } from "react-router-dom";
 import "./index.scss";
 import App from "./App";
 import reportWebVitals from "./reportWebVitals";
-import { createHttpLink, ApolloProvider, ApolloClient, InMemoryCache } from "@apollo/client";
-import {setContext} from '@apollo/client/link/context'
+import {
+  createHttpLink,
+  ApolloProvider,
+  ApolloClient,
+  InMemoryCache,
+} from "@apollo/client";
+import { setContext } from "@apollo/client/link/context";
 
 const link = createHttpLink({
-  uri: "http://localhost:5000/graphql"
-})
+  uri: "http://localhost:5004/graphql",
+});
 
 const authLink = setContext((_, { headers }) => {
   const token = localStorage.getItem("token");
@@ -27,14 +32,13 @@ const client = new ApolloClient({
   cache: new InMemoryCache(),
 });
 
-
 const root = ReactDOM.createRoot(
   document.getElementById("root") as HTMLElement
 );
 root.render(
   <BrowserRouter>
     <React.StrictMode>
-    <ApolloProvider client={client}>
+      <ApolloProvider client={client}>
         <App />
       </ApolloProvider>
     </React.StrictMode>

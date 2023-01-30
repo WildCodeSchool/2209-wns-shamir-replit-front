@@ -5,9 +5,10 @@ import {
   InMemoryCache,
 } from "@apollo/client";
 
-let fromFrontUrl = "http://localhost:5000";
+let fromFrontUrl = "http://localhost:5004";
 
 if (process.env.BACKEND_URL) fromFrontUrl = process.env.BACKEND_URL;
+console.log(fromFrontUrl);
 
 const defaultOptions: DefaultOptions = {
   watchQuery: {
