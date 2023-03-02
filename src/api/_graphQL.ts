@@ -27,5 +27,6 @@ const params: ApolloClientOptions<unknown> = {
 };
 
 const token = localStorage.getItem("token");
+
 if (token) params.headers = { Authorization: "Bearer " + token };
 export const api = new ApolloClient(params);

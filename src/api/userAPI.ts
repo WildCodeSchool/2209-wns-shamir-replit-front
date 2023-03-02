@@ -46,8 +46,19 @@ export const userAPI = {
           }
         `,
       })
-    ).data.getAllUsers as IUser[];
+    ).data.getAllUsers as IUser<string>[];
 
-    return users.map((user) => ({ ...user, id: user.id.toString() }));
+    console.log("getAll users", users);
+
+    return users.map((user) => ({
+      ...user,
+      id: user.id.toString(),
+      date_start_subscription: user.date_start_subscription
+        ? new Date(user.date_start_subscription)
+        : undefined,
+      date_end_subscription: user.date_end_subscription
+        ? new Date(user.date_end_subscription)
+        : undefined,
+    }));
   },
 };

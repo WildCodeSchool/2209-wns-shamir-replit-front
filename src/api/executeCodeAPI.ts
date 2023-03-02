@@ -7,15 +7,24 @@ export type ExecutedCode = {
 
 type GetExecutedCode = {
   status: number;
-  data: ExecutedCode[] | undefined;
+  data:
+    | { result: ExecutedCode[]; nbExecutions: number | undefined }
+    | undefined;
 };
 
 export const executeCodeAPI = {
-  sendCode: async (code: string): Promise<GetExecutedCode> => {
+  sendCode: async (
+    code: string,
+    projectId: number
+  ): Promise<GetExecutedCode> => {
     try {
-      const { status, data }: GetExecutedCode = await api.post(`/executeCode`, {
-        code,
-      });
+      const { status, data }: GetExecutedCode = await api().post(
+        `/executeCode`,
+        {
+          code,
+          projectId,
+        }
+      );
 
       return { status, data };
     } catch (e) {

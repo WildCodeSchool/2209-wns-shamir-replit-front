@@ -9,11 +9,10 @@ export type IFiles = {
   projectId?: number;
 };
 
-
-export type FilesCodeData ={
+export type FilesCodeData = {
   id: number;
   projectId: number;
   name: string;
   language: string;
   code: string;
-}
+};

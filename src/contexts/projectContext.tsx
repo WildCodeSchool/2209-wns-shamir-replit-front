@@ -1,4 +1,4 @@
-import { createContext, useState, useMemo, ReactNode } from "react";
+import React, { createContext, useState, useMemo, ReactNode } from "react";
 import { IProject } from "../interfaces/IProject";
 
 const initProject: Partial<IProject> = {
@@ -20,6 +20,7 @@ type TypeContext = {
 
 const ProjectContext = createContext<TypeContext>({
   project: initProject,
+  // eslint-disable-next-line @typescript-eslint/no-empty-function
   setProject: () => {},
 });
 

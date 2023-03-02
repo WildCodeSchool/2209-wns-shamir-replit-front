@@ -1,4 +1,4 @@
-import { ReactNode, useContext } from "react";
+import React, { ReactNode, useContext } from "react";
 import ForceProjectListUpdateContext from "../contexts/forceProjectListUpdateContext";
 import ShareModalContext from "../contexts/shareModalContext";
 import styles from "./Layout.module.scss";

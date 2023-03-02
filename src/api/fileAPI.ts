@@ -2,7 +2,7 @@ import { api } from "./_graphQL";
 import { fileRequest } from "./fileRequest";
 import { IFiles, FilesCodeData } from "../interfaces/iFile";
 
-type updateRes = {
+export type updateRes = {
   success: boolean;
 };
 

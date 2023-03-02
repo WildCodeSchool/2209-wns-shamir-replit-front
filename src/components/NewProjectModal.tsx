@@ -5,7 +5,7 @@ import TextField from "@mui/material/TextField";
 import Switch from "@mui/material/Switch";
 import Button from "@mui/material/Button";
 import { FormControlLabel } from "@mui/material";
-import { BaseSyntheticEvent, useState } from "react";
+import React, { BaseSyntheticEvent, useState } from "react";
 import { CreateProject } from "../interfaces/IProject";
 
 type NewProjectModalProps = {
@@ -54,7 +54,7 @@ const NewProjectModal = ({
   return (
     <div className={modalStyles.modalBackground} onClick={closeNewProjectModal}>
       <div className={modalStyles.modalContainer} onClick={handleModalClick}>
-        <h3>Création d'un nouveau projet</h3>
+        <h3>Création d&apos;un nouveau projet</h3>
         <TextField
           id="outlined-basic"
           label="Nom du projet"

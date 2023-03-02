@@ -1,7 +1,7 @@
 FROM node:18 as base
 
-WORKDIR /src
-COPY package*.json /
+WORKDIR /front
+COPY package*.json /front
 EXPOSE 3000
 
 FROM base as production
@@ -13,5 +13,8 @@ CMD ["node", "src/index.js"]
 FROM base as dev
 ENV NODE_ENV=development
 RUN npm install --force
-COPY . /
+COPY src /front/src
+COPY public /front/public
+COPY .env /front/.env
+COPY tsconfig.json /front/
 CMD ["react-scripts", "start"]

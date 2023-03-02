@@ -1,4 +1,4 @@
-import { BaseSyntheticEvent, useContext } from "react";
+import React, { BaseSyntheticEvent, useContext } from "react";
 import modalStyles from "../styles/modal.module.scss";
 import DeleteModalContext from "../contexts/deleteModalContext";
 import ProjectContext from "../contexts/projectContext";

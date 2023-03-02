@@ -1,4 +1,4 @@
-import { createContext, useState, useMemo, ReactNode } from "react";
+import React, { createContext, useState, useMemo, ReactNode } from "react";
 
 type ForceProjectListUpdateProviderProps = { children: ReactNode };
 type TypeContext = {
@@ -8,6 +8,7 @@ type TypeContext = {
 
 const ForceProjectListUpdateContext = createContext<TypeContext>({
   forceProjectListUpdate: false,
+  // eslint-disable-next-line @typescript-eslint/no-empty-function
   setForceProjectListUpdate: () => {},
 });
 

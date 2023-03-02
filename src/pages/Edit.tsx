@@ -1,4 +1,4 @@
-import { useContext, useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import Editor from "../components/Editor";
 import Console from "../components/Console";
 import { executeCodeAPI, ExecutedCode } from "../api/executeCodeAPI";
@@ -17,8 +17,11 @@ const Edit = () => {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [filesCodeArr, setFilesCodeArr] = useState<FilesCodeData[]>();
   const [usedFile, setUsedFile] = useState<FilesCodeData>();
-
+  const { project } = useContext(ProjectContext);
   const [editorCode, setEditorCode] = useState("");
+  const [nbExecutions, setNbExecutions] = useState<number | undefined>(
+    undefined
+  );
 
   const updateFileCodeOnline = async (
     codeToPush: string,
@@ -26,20 +29,32 @@ const Edit = () => {
     projectId: number
   ) => {
     if (usedFile) {
-      return await fileAPI.updateFileOnline(codeToPush, fileId, projectId);
+      try {
+        return await fileAPI.updateFileOnline(codeToPush, fileId, projectId);
+      } catch (e) {
+        return false;
+      }
     }
+    return false;
   };
 
   const updateCode = async (value: string) => {
     setEditorCode(value);
   };
 
-  const { project } = useContext(ProjectContext);
   const sendMonaco = async (code: string) => {
-    const { data, status } = await executeCodeAPI.sendCode(code);
+    const projectId = project.id;
 
-    if (status === 200 && data) {
-      setConsoleResult(data);
+    if (projectId) {
+      const { data, status } = await executeCodeAPI.sendCode(
+        code,
+        parseInt(projectId, 10)
+      );
+
+      if (status === 200 && data) {
+        setConsoleResult(data.result);
+        setNbExecutions(data.nbExecutions);
+      }
     }
   };
 
@@ -56,7 +71,6 @@ const Edit = () => {
 
   useEffect(() => {
     getFilesInformations();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [project]);
 
   return (
@@ -76,8 +90,7 @@ const Edit = () => {
       <div className={styles.resizeBar}>
         <img src="/grab.svg" alt="resize" draggable={false} />
       </div>
-      <Console consoleResult={consoleResult} />
-      {/* <CommentSection /> */}
+      <Console consoleResult={consoleResult} nbExecutions={nbExecutions} />
     </div>
   );
 };

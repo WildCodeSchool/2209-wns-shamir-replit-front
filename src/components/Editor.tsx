@@ -1,16 +1,18 @@
-import { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import styles from "./Editor.module.scss";
-import Editor, { useMonaco } from "@monaco-editor/react";
+import Editor, { Monaco, useMonaco } from "@monaco-editor/react";
+import * as monaco from "monaco-editor/esm/vs/editor/editor.api";
+import { updateRes } from "../api/fileAPI";
 
 type EditeurProps = {
   sendMonaco: (code: string) => Promise<void>;
   updateCode: (value: string) => void;
   editorCode: string;
   updateFileCodeOnline: (
-    code: string,
+    codeToPush: string,
     fileId: number,
     projectId: number
-  ) => void;
+  ) => Promise<false | updateRes | undefined>;
   fileId: number;
   projectId: number;
 };
@@ -25,41 +27,46 @@ const Editeur = (props: EditeurProps) => {
 
   // const editor = document.getElementById("resize");
   // const [input, setInput] = useState<string>();
-  const editorRef = useRef<any>(null);
+  const editorRef = useRef<monaco.editor.IStandaloneCodeEditor | null>(null);
 
   const getMonacoText = () => {
     setIsSaveOnline(false);
-    props.updateCode(editorRef.current.getValue());
+    if (editorRef.current) props.updateCode(editorRef.current.getValue());
   };
 
-  const monaco = useMonaco();
+  const monacoHook = useMonaco();
   function toggleTheme() {
     setTheme(theme === "light" ? "vs-dark" : "light");
   }
 
-  function handleEditorDidMount(editor: any, monaco: any) {
+  function handleEditorDidMount(
+    editor: monaco.editor.IStandaloneCodeEditor,
+    _monaco: Monaco
+  ) {
     editorRef.current = editor;
   }
 
   const execute = () => {
-    const code = editorRef.current.getValue();
+    if (editorRef.current) {
+      const code = editorRef.current.getValue();
 
-    if (code) props.sendMonaco(code);
+      if (code) props.sendMonaco(code);
+    }
   };
 
   useEffect(() => {
     // do conditional chaining
-    monaco?.languages.typescript.javascriptDefaults.setEagerModelSync(true);
-    const willUpdate = setTimeout(() => {
-      props.updateFileCodeOnline(
+    monacoHook?.languages.typescript.javascriptDefaults.setEagerModelSync(true);
+    const willUpdate = setTimeout(async () => {
+      const res = await props.updateFileCodeOnline(
         props.editorCode,
         props.fileId,
         props.projectId
       );
-      setIsSaveOnline(true);
-    }, 5000);
+      if (res !== false && res !== undefined) setIsSaveOnline(true);
+    }, 2000);
     return () => clearTimeout(willUpdate);
-  }, [monaco, props.editorCode]);
+  }, [monacoHook, props.editorCode]);
 
   return (
     <div className={styles.container}>

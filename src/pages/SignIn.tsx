@@ -1,23 +1,22 @@
-import { useContext, useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import styles from "./Signin.module.scss";
-import { Modal } from "@mui/material";
-import Button from "@mui/material/Button/Button";
-import { userAPI } from "../api/userAPI";
-import { CreateUser } from "../interfaces/IUser";
-import { authAPI } from "../api/authAPI";
-import UserContext from "../contexts/userContext";
+import { TextField } from "@mui/material";
 import Alert from "@mui/material/Alert";
 import Stack from "@mui/material/Stack";
+import Button from "@mui/material/Button/Button";
+import { userAPI } from "../api/userAPI";
+import { authAPI } from "../api/authAPI";
+import UserContext from "../contexts/userContext";
+import RegisterModal from "../components/RegisterModal";
+import { CreateUser } from "../interfaces/IUser";
+import { api } from "../api/_graphQL";
 
 const SignIn = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [modal, setModal] = useState<boolean>(false);
-  const [emailInscription, setEmailInscription] = useState("");
-  const [passwordInscription, setPasswordInscription] = useState("");
-  const [loginInscription, setLoginInscription] = useState("");
-  const { user, setUser } = useContext(UserContext);
+  const { setUser } = useContext(UserContext);
 
   const navigate = useNavigate();
   const token = localStorage.getItem("token");
@@ -25,36 +24,26 @@ const SignIn = () => {
   const handleLogin = async () => {
     const { token, userId } = await authAPI.getToken(email, password);
 
-    setUser({ ...user, id: userId.toString() });
-
     localStorage.setItem("userId", userId.toString());
     localStorage.setItem("token", token);
 
+    const user = (await userAPI.getAll()).filter(
+      (u) => u.id === userId.toString()
+    )[0];
+
+    setUser({ ...user, id: userId.toString() });
+    await api.resetStore();
+    // eslint-disable-next-line no-restricted-globals
+    location.reload();
+
     navigate("/");
   };
-  const handleOpen = () => {
-    setModal(true);
-  };
 
-  const handleClose = () => {
-    setModal(false);
-  };
-
-  useEffect(() => {
-    if (token) {
-      navigate("/");
-    }
-  }, []);
-
-  const openModal = () => {
-    setModal(!modal);
-  };
-
-  const postUser = () => {
-    userAPI.create({});
-  };
-
-  const SendUser = async () => {
+  const registerNewUser = async (
+    emailInscription: string,
+    loginInscription: string,
+    passwordInscription: string
+  ) => {
     if (emailInscription && passwordInscription && !token) {
       try {
         const user: CreateUser = {
@@ -67,85 +56,80 @@ const SignIn = () => {
         console.error("error", e);
       }
     }
+    closeModal();
+    return (
+      <Stack sx={{ width: "100%" }} spacing={2}>
+        <Alert severity="success">
+          This is a success alert — check it out!
+        </Alert>
+      </Stack>
+    );
   };
 
+  const openModal = () => {
+    setModal(true);
+  };
+
+  const closeModal = () => {
+    setModal(false);
+  };
+
+  useEffect(() => {
+    if (token) {
+      navigate("/");
+    }
+  }, []);
+
   return (
-    <div className={styles.connection}>
-      <input
-        className={styles.inputCo}
-        placeholder="email"
-        onChange={(e) => {
-          setEmail(e.target.value);
-        }}
-      />{" "}
-      <br />
-      <input
-        className={styles.inputCo}
-        type="password"
-        placeholder="password"
-        onChange={(e) => {
-          setPassword(e.target.value);
-        }}
-      />{" "}
-      <br />
-      <div className={styles.btnco}>
-        <Button
-          onClick={handleLogin}
+    <>
+      <div className={styles.connection}>
+        <TextField
+          id="email_input"
+          label="votre email"
           variant="outlined"
-          color="primary"
-          size="medium"
-        >
-          Login
-        </Button>
-        <Button onClick={handleOpen} variant="outlined" color="primary">
-          inscription
-        </Button>
+          sx={{
+            backgroundColor: "white",
+          }}
+          value={email}
+          onChange={(e) => {
+            setEmail(e.target.value);
+          }}
+          autoFocus
+        />
+        <TextField
+          id="password_input"
+          label="mot de passe"
+          type="password"
+          variant="outlined"
+          sx={{
+            backgroundColor: "white",
+          }}
+          value={password}
+          onChange={(e) => {
+            setPassword(e.target.value);
+          }}
+        />
+        <div className={styles.btnco}>
+          <Button
+            onClick={handleLogin}
+            variant="contained"
+            color="primary"
+            size="medium"
+          >
+            Login
+          </Button>
+          <Button onClick={openModal} variant="contained" color="primary">
+            inscription
+          </Button>
+        </div>
       </div>
-      <div>
-        <Modal
-          className={styles.modal}
-          open={modal}
-          onClose={handleClose}
-          aria-labelledby="simple-modal-title"
-          aria-describedby="simple-modal-description"
-        >
-          <div className={styles.form}>
-            <input
-              className={styles.input}
-              type="email"
-              placeholder="email"
-              onChange={(e) => {
-                setEmailInscription(e.target.value);
-              }}
-            />
-            <input
-              className={styles.input}
-              type="password"
-              placeholder="password"
-              onChange={(e) => {
-                setPasswordInscription(e.target.value);
-              }}
-            />
-            <input
-              className={styles.input}
-              type="text"
-              placeholder="login"
-              onChange={(e) => {
-                setLoginInscription(e.target.value);
-              }}
-            />
-            <Button
-              onClick={SendUser}
-              variant="outlined"
-              color="primary"
-              className={styles.button}
-            >
-              envoyé
-            </Button>
-          </div>
-        </Modal>
-      </div>
-    </div>
+      {modal === true && (
+        <RegisterModal
+          closeModal={closeModal}
+          registerNewUser={registerNewUser}
+        />
+      )}
+    </>
   );
 };
 export default SignIn;

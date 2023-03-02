@@ -1,4 +1,4 @@
-import { createContext, useState, useMemo, ReactNode } from "react";
+import React, { createContext, useState, useMemo, ReactNode } from "react";
 
 type ShareModal = {
   projectId: number | undefined;
@@ -16,6 +16,7 @@ type TypeContext = {
 
 const ShareModalContext = createContext<TypeContext>({
   shareModal: initShareModal,
+  // eslint-disable-next-line @typescript-eslint/no-empty-function
   setShareModal: () => {},
 });
 

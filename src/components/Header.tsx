@@ -1,29 +1,47 @@
-import React, { useContext, useEffect, useState } from "react";
+import React, { useContext, useEffect } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
 import styles from "./Header.module.scss";
 import ProjectContext from "../contexts/projectContext";
-import { useApolloClient } from "@apollo/client";
 import UserContext from "../contexts/userContext";
 import { projectAPI } from "../api/projectAPI";
 import { ILike } from "../interfaces/IProject";
 import ShareModalContext from "../contexts/shareModalContext";
 import { isLiked } from "../utils/isLiked";
+import { Avatar, Tooltip } from "@mui/material";
+import { userAPI } from "../api/userAPI";
+import ForceProjectListUpdateContext from "../contexts/forceProjectListUpdateContext";
 
 const Header = () => {
-  const [isAuth, setIsAuth] = useState(false);
   const { project, setProject } = useContext(ProjectContext);
   const { user, setUser } = useContext(UserContext);
   const { setShareModal } = useContext(ShareModalContext);
-  const client = useApolloClient();
+  const { setForceProjectListUpdate } = useContext(
+    ForceProjectListUpdateContext
+  );
+  // const client = useApolloClient();
   const navigate = useNavigate();
 
-  const token = localStorage.getItem("token");
-  const userId = localStorage.getItem("userId");
+  // const token = localStorage.getItem("token");
+  // const userId = localStorage.getItem("userId");
 
   const handleToggleModal = () => {
     const projectId = project.id;
 
     if (projectId) setShareModal({ projectId: parseInt(projectId, 10) });
+  };
+
+  const getInitialFromLogin = (login: string | undefined) => {
+    if (!login) return " ";
+
+    const splitted = login.split(" ");
+
+    if (splitted.length > 1) {
+      return splitted
+        .map((split) => split[0])
+        .join("")
+        .slice(0, 2)
+        .toUpperCase();
+    } else return login.slice(0, 2).toUpperCase();
   };
 
   const toggleLike = async () => {
@@ -65,28 +83,31 @@ const Header = () => {
     }
   };
 
-  const signOut = () => {
+  const signOut = async () => {
     localStorage.setItem("token", "");
     localStorage.setItem("userId", "");
     setUser({});
     setProject({});
+    setForceProjectListUpdate(true);
 
-    client.resetStore();
     navigate("/login");
-    setIsAuth(false);
+  };
+
+  const updateUserContext = async () => {
+    const localStorageUserId = localStorage.getItem("userId");
+
+    if (user.login === undefined && localStorageUserId) {
+      const reqUser = (await userAPI.getAll()).filter(
+        (u) => u.id === localStorageUserId
+      )[0];
+
+      setUser({ ...reqUser, id: localStorageUserId });
+    }
   };
 
   useEffect(() => {
-    if (token) {
-      setIsAuth(true);
-    }
-  }, [token]);
-
-  useEffect(() => {
-    if (userId) {
-      setUser({ ...user, id: userId });
-    }
-  }, [userId]);
+    updateUserContext();
+  }, [user]);
 
   return (
     <>
@@ -128,12 +149,19 @@ const Header = () => {
         <div className={[styles.header, styles.headerRight].join(" ")}>
           <button onClick={signOut}>Logout</button>
           <NavLink to="/Profil">
-            <img
-              src="/people.svg"
-              alt="people"
-              draggable={false}
-              className={styles.img}
-            />
+            <Tooltip title={`logged in as ${user.login}`} arrow>
+              <Avatar
+                sx={{
+                  bgcolor: "red",
+                  width: 26,
+                  height: 26,
+                  fontSize: 12,
+                  fontWeight: "bold",
+                }}
+              >
+                <div>{getInitialFromLogin(user.login)}</div>
+              </Avatar>
+            </Tooltip>
           </NavLink>
 
           {/* <NavLink to="/Profil">

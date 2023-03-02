@@ -2,12 +2,13 @@ import { useNavigate } from "react-router-dom";
 import { IProject } from "../interfaces/IProject";
 import styles from "./ProjectItem.module.scss";
 import ProjectContext from "../contexts/projectContext";
-import { useContext } from "react";
+import React, { useContext } from "react";
 import { projectAPI } from "../api/projectAPI";
 import UserContext from "../contexts/userContext";
 import { isLiked } from "../utils/isLiked";
 import ShareModalContext from "../contexts/shareModalContext";
 import DeleteModalContext from "../contexts/deleteModalContext";
+import EditOffIcon from "@mui/icons-material/EditOff";
 
 type ProjectItemProps = {
   project: IProject;
@@ -23,7 +24,7 @@ const ProjectItem = ({
   const { setProject } = useContext(ProjectContext);
   const { user } = useContext(UserContext);
   const { setShareModal } = useContext(ShareModalContext);
-  const { deleteModal, setDeleteModal } = useContext(DeleteModalContext);
+  const { setDeleteModal } = useContext(DeleteModalContext);
 
   const navigate = useNavigate();
   const handleOpenProject = async () => {
@@ -77,7 +78,13 @@ const ProjectItem = ({
             onClick={handleOpenProject}
             className={[styles.button, styles.edit].join(" ")}
           >
-            <img src="/pen.svg" alt="edit" draggable={false} />
+            {owned ||
+            (project.projectShare?.filter((pshare) => pshare.write).length ||
+              []) > 0 ? (
+              <img src="/pen.svg" alt="edit" draggable={false} />
+            ) : (
+              <EditOffIcon />
+            )}
           </button>
           {owned === true && (
             <button
@@ -97,7 +104,7 @@ const ProjectItem = ({
         </div>
 
         <div className={styles.footer}>
-          {owned === true || project.isPublic === true ? (
+          {owned === true ? (
             <button
               onClick={handleToggleShareModal}
               className={[styles.button, styles.share].join(" ")}

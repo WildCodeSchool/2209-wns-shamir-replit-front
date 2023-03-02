@@ -1,4 +1,4 @@
-import { createContext, useState, useMemo, ReactNode } from "react";
+import React, { createContext, useState, useMemo, ReactNode } from "react";
 import { IUser } from "../interfaces/IUser";
 
 const initUser: Partial<IUser> = {
@@ -17,6 +17,7 @@ type TypeContext = {
 
 const UserContext = createContext<TypeContext>({
   user: initUser,
+  // eslint-disable-next-line @typescript-eslint/no-empty-function
   setUser: () => {},
 });
 

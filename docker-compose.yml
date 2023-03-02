@@ -5,7 +5,8 @@ services:
       context: ./
       target: dev
     volumes:
-      - .:/src
+      - ./src:/front/src
+      - ./public:/front/public
     command: npm run start
     ports:
       - "3000:3000"
