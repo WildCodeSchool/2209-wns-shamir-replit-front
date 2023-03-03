@@ -1,32 +1,33 @@
-import { createContext, useState, useMemo, ReactNode } from "react";
-import { ExtProject } from "../interfaces";
+import React, { createContext, useState, useMemo, ReactNode } from "react";
+import { IProject } from "../interfaces/IProject";
 
-const initProject: Partial<ExtProject> = {
+const initProject: Partial<IProject> = {
   id: undefined,
+  id_storage_number: undefined,
   name: undefined,
-  owner: undefined,
   description: undefined,
-  languages: [],
-  nb_like: undefined,
+  isPublic: undefined,
+  like: [],
   nb_views: undefined,
-  is_public: undefined,
+  file: [],
 };
 
 type ProjectContextProviderProps = { children: ReactNode };
 type TypeContext = {
-  project: Partial<ExtProject>;
-  setProject: (c: Partial<ExtProject>) => void;
+  project: Partial<IProject>;
+  setProject: (c: Partial<IProject>) => void;
 };
 
 const ProjectContext = createContext<TypeContext>({
   project: initProject,
+  // eslint-disable-next-line @typescript-eslint/no-empty-function
   setProject: () => {},
 });
 
 export function ProjectContextProvider({
   children,
 }: ProjectContextProviderProps) {
-  const [project, setProject] = useState<Partial<ExtProject>>(initProject);
+  const [project, setProject] = useState<Partial<IProject>>(initProject);
   const value = useMemo(
     () => ({
       project,

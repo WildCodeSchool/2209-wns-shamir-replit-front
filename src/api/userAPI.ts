@@ -1,6 +1,7 @@
 import { api } from "./_graphQL";
 import { IUser, CreateUser } from "../interfaces/IUser";
 import { gql } from "@apollo/client";
+// import { logMissingFieldErrors } from "@apollo/client/core/ObservableQuery";
 
 export const userAPI = {
   create: async (user: Partial<CreateUser>): Promise<IUser> => {
@@ -8,20 +9,20 @@ export const userAPI = {
       await api.mutate({
         // mutation à refaire lorsque le back sera OP
         mutation: gql`
-          mutation Mutation($user: iUser!) {
-            createUser(user: $user) {
+          mutation Mutation(
+            $password: String!
+            $login: String!
+            $email: String!
+          ) {
+            createUser(password: $password, login: $login, email: $email) {
               id
-              name
-              description
             }
           }
         `,
         variables: {
-          user: {
-            email: user.email,
-            login: user.login,
-            password: user.password,
-          },
+          password: user.password,
+          login: user.login,
+          email: user.email,
         },
       })
     ).data.createUser as IUser;
@@ -35,18 +36,29 @@ export const userAPI = {
         // query à refaire lorsque le back sera OP
         query: gql`
           query Query {
-            User {
+            getAllUsers {
               id
               email
               login
-              date_start_subscription
               date_end_subscription
+              date_start_subscription
             }
           }
         `,
       })
-    ).data.User as IUser[];
+    ).data.getAllUsers as IUser<string>[];
 
-    return users.map((user) => ({ ...user, id: user.id.toString() }));
+    console.log("getAll users", users);
+
+    return users.map((user) => ({
+      ...user,
+      id: user.id.toString(),
+      date_start_subscription: user.date_start_subscription
+        ? new Date(user.date_start_subscription)
+        : undefined,
+      date_end_subscription: user.date_end_subscription
+        ? new Date(user.date_end_subscription)
+        : undefined,
+    }));
   },
 };

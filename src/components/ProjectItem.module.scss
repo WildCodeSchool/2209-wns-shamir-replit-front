@@ -1,6 +1,19 @@
 @import "../styles/variables.scss";
 
+@keyframes projectIn {
+  0% {
+    filter: opacity(0);
+    transform: translateY(-50%);
+  }
+  100% {
+    filter: opacity(1);
+    transform: translateY(0);
+  }
+}
+
 .article {
+  animation: projectIn 0.2s ease-in-out both;
+
   width: $item-width;
   height: $item-height;
   background-color: $main-color-light;
@@ -91,6 +104,10 @@
           width: 22px;
           margin-right: 5px;
         }
+      }
+
+      .like {
+        cursor: pointer;
       }
 
       .hiddenButton {

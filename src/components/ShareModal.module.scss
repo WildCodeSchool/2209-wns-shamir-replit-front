@@ -1,0 +1,29 @@
+@import "../styles/variables.scss";
+
+.table {
+  border-spacing: 0;
+  tr {
+    td {
+      padding: 0 5px;
+      text-align: center;
+      width: 90px;
+      & > * {
+        margin: 5px;
+      }
+    }
+  }
+
+  tr:not(:first-child) {
+    background-color: $main-color-ultralight;
+  }
+}
+
+.flexRow {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  h4 {
+    margin: 0;
+    cursor: pointer;
+  }
+}

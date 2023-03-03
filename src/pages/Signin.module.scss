@@ -1,0 +1,37 @@
+@import "../styles/variables.scss";
+
+.modal {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.button {
+  color: white;
+  margin-top: 2vh;
+}
+
+.connection {
+  margin-top: 25%;
+  display: flex;
+  gap: 10px;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  width: 100vw;
+}
+
+.inputCo {
+  margin-top: 10px;
+  margin-left: 10px;
+  margin-right: 10px;
+  text-align: center;
+  width: 15%;
+}
+
+.btnco {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  height: 10vh;
+  justify-content: space-evenly;
+}

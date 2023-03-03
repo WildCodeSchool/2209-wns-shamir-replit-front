@@ -1,0 +1,75 @@
+@import "./variables.scss";
+
+$horizontalPadding: 10px;
+$borderRadius: 10px;
+
+@keyframes modalIn {
+  0% {
+    transform: scale(0);
+    filter: opacity(0);
+  }
+  70% {
+    transform: scale(1.1);
+    filter: opacity(1);
+  }
+  85% {
+    transform: scale(0.95);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.modalBackground {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+
+  background-color: rgba(0, 0, 0, 0.137);
+  backdrop-filter: blur(10px);
+  z-index: 1;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  .modalContainer {
+    animation: modalIn 0.3s ease-in-out both;
+
+    background-color: $main-color-ultralight;
+    border-radius: $borderRadius;
+    padding: 0 $horizontalPadding 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    user-select: none;
+    box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px;
+
+    h3 {
+      border-top-left-radius: $borderRadius;
+      border-top-right-radius: $borderRadius;
+      position: relative;
+      margin: 0;
+      left: calc(-1 * $horizontalPadding);
+      width: calc(100% + 2 * $horizontalPadding);
+      background-color: $main-color-dark;
+      color: white;
+      padding: 5px;
+      text-align: center;
+    }
+
+    h4 {
+      margin-top: 0;
+    }
+
+    .buttonContainer {
+      display: flex;
+      flex-direction: row-reverse;
+      width: 100%;
+      align-self: flex-end;
+      justify-content: space-between;
+    }
+  }
+}

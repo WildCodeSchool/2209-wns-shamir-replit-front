@@ -37,3 +37,22 @@
   top: 0;
   width: 5%;
 }
+
+.rightPanel {
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-end;
+  align-items: center;
+}
+
+.imgBtn {
+  width: 30px;
+  height: 30px;
+  margin: 5px;
+  cursor: pointer;
+}
+
+.themeBtn {
+  align-items: center;
+  cursor: pointer;
+}

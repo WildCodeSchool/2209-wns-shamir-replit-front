@@ -14,6 +14,12 @@
   p {
     margin: 2px 0;
     padding-left: 12px;
+    display: flex;
+    font-size: 20px;
+    a {
+      color: green;
+      font-weight: bold;
+    }
   }
 
   .log {
@@ -89,8 +95,8 @@
   &-2 {
     --scroll-size: 8px;
     --scroll-radius: 10px;
-    --scroll-track: #009d9820;// rgb(255 255 255 / 10%);
-    --scroll-thumb-color: #009d98dd;;  // rgb(0 0 0 / 80%);
+    --scroll-track: #009d9820; // rgb(255 255 255 / 10%);
+    --scroll-thumb-color: #009d98dd; // rgb(0 0 0 / 80%);
   }
 
   // Ejemplo 3

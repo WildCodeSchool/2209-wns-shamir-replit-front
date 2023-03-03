@@ -1,0 +1,64 @@
+@import "../styles/variables.scss";
+
+$border-radius: 15px;
+$planDivWidth: 340px;
+
+.plansContainer {
+  display: flex;
+  gap: 20px;
+
+  & > div {
+    width: $planDivWidth;
+    background-color: white;
+    border-radius: $border-radius;
+    user-select: none;
+    cursor: pointer;
+    overflow: hidden;
+    transition: filter 0.3s ease-in-out;
+
+    h3 {
+      text-align: center;
+      background-color: $main-color;
+      margin: 0;
+      padding: 5px 0;
+      color: white;
+      text-transform: capitalize;
+    }
+    h4 {
+      text-align: center;
+    }
+    & > div.descriptionContainer {
+      padding: 10px;
+    }
+  }
+
+  & > div:hover {
+    filter: brightness(0.9);
+  }
+
+  .selected {
+    border: 3px solid black;
+  }
+}
+
+.checkoutButtonContainer {
+  margin-top: 20px;
+  width: calc($planDivWidth * 2 + 20px);
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 20px;
+}
+
+.stripeContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  width: 400px;
+  // height: 400px;
+  padding: 20px;
+  border-radius: 10px;
+  background-color: white;
+}

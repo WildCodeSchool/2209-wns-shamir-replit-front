@@ -2,16 +2,26 @@
 
 .section {
   h2 {
+    width: fit-content;
     display: flex;
     align-items: center;
+    cursor: pointer;
     .arrowDown {
       width: 50px;
       height: 50px;
+      transition: rotate 0.2s ease-in-out;
+      user-select: none;
+    }
+
+    .arrowLeft {
+      rotate: -90deg;
     }
 
     span {
       font-size: 20px;
       color: $main-color-dark;
+      margin-right: 20px;
+      user-select: none;
     }
   }
 
@@ -19,6 +29,8 @@
     padding: 10px;
     display: flex;
     gap: 20px;
+    display: flex;
+    flex-wrap: wrap;
 
     .newProject {
       background-color: $main-color-ultralight;
