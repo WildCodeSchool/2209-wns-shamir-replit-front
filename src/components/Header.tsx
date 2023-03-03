@@ -1,10 +1,9 @@
-import React, { useContext, useEffect } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
 import styles from "./Header.module.scss";
 import ProjectContext from "../contexts/projectContext";
 import UserContext from "../contexts/userContext";
 import { projectAPI } from "../api/projectAPI";
-import { ILike } from "../interfaces/IProject";
 import ShareModalContext from "../contexts/shareModalContext";
 import { isLiked } from "../utils/isLiked";
 import { Avatar, Tooltip } from "@mui/material";
@@ -18,6 +17,9 @@ const Header = () => {
   const { setForceProjectListUpdate } = useContext(
     ForceProjectListUpdateContext
   );
+
+  const [state, setState] = useState(false);
+
   // const client = useApolloClient();
   const navigate = useNavigate();
 
@@ -45,42 +47,40 @@ const Header = () => {
   };
 
   const toggleLike = async () => {
-    const userId = user?.id;
-    const projectLike = project.like;
-
-    const alreadyLiked =
-      userId !== undefined &&
-      (
-        projectLike?.filter(
-          (like) => like.userId.id === parseInt(userId, 10)
-        ) || []
-      ).length > 0;
-
-    const projectId = project.id;
-
-    if (projectId && userId) {
-      if (!alreadyLiked) {
-        await projectAPI.addLike(projectId);
-
-        const newLike: ILike = { id: -1, userId: { id: parseInt(userId, 10) } };
-
-        setProject({
-          ...project,
-          like: projectLike ? [...projectLike, newLike] : [newLike],
-        });
-      } else {
-        await projectAPI.removeLike(projectId);
-
-        setProject({
-          ...project,
-          like: projectLike
-            ? projectLike.filter(
-                (like) => like.userId.id !== parseInt(userId, 10)
-              )
-            : [],
-        });
-      }
-    }
+    const projId = parseInt(project.id as string, 10) as number;
+    state
+      ? await projectAPI.addLike(projId)
+      : await projectAPI.removeLike(projId);
+    setState((prev) => !prev);
+    // const alreadyLiked =
+    //   userId !== undefined &&
+    //   (
+    //     projectLike?.filter((like) => like.userId === parseInt(userId, 10)) ||
+    //     []
+    //   ).length > 0;
+    // const projectId = project.id;
+    // if (projectId && userId) {
+    //   if (!alreadyLiked) {
+    //     await projectAPI.addLike(parseInt(projectId, 10));
+    //     const newLike: ILike = {
+    //       id: -1,
+    //       userId: parseInt(userId, 10),
+    //       projectId: parseInt(projectId, 10),
+    //     };
+    //     setProject({
+    //       ...project,
+    //       like: projectLike ? [...projectLike, newLike] : [newLike],
+    //     });
+    //   } else {
+    //     await projectAPI.removeLike(projectId);
+    //     setProject({
+    //       ...project,
+    //       like: projectLike
+    //         ? projectLike.filter((like) => like.userId !== parseInt(userId, 10))
+    //         : [],
+    //     });
+    //   }
+    // }
   };
 
   const signOut = async () => {

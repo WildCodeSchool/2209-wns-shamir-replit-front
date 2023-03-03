@@ -3,7 +3,7 @@ import { IProject, CreateProject } from "../interfaces/IProject";
 import { gql } from "@apollo/client";
 
 export const projectAPI = {
-  create: async (project: Omit<CreateProject, "userId">): Promise<IProject> => {
+  create: async (project: CreateProject): Promise<IProject> => {
     const newProject = (
       await api.mutate({
         // mutation à refaire lorsque le back sera OP
@@ -21,13 +21,13 @@ export const projectAPI = {
               description
               like {
                 id
-                userId {
+                user {
                   id
                   login
                 }
               }
               projectShare {
-                userId {
+                user {
                   login
                   email
                   id
@@ -66,12 +66,12 @@ export const projectAPI = {
                 description
                 like {
                   id
-                  userId {
+                  user {
                     id
                   }
                 }
                 projectShare {
-                  userId {
+                  user {
                     login
                     email
                     id
@@ -86,7 +86,7 @@ export const projectAPI = {
                 isPublic
                 name
                 nb_views
-                userId {
+                user {
                   id
                   login
                 }
@@ -118,12 +118,12 @@ export const projectAPI = {
                 description
                 like {
                   id
-                  userId {
+                  user {
                     id
                   }
                 }
                 projectShare {
-                  userId {
+                  user {
                     login
                     email
                     id
@@ -138,7 +138,7 @@ export const projectAPI = {
                 isPublic
                 name
                 nb_views
-                userId {
+                user {
                   id
                   login
                 }
@@ -192,12 +192,12 @@ export const projectAPI = {
                 nb_views
                 like {
                   id
-                  userId {
+                  user {
                     id
                   }
                 }
                 projectShare {
-                  userId {
+                  user {
                     login
                     email
                     id
@@ -207,7 +207,7 @@ export const projectAPI = {
                   comment
                   write
                 }
-                userId {
+                user {
                   id
                   login
                 }
@@ -251,7 +251,7 @@ export const projectAPI = {
     return updatedProject[0]?.nb_views;
   },
 
-  addLike: async (rawProjectId: number | string): Promise<number> => {
+  addLike: async (rawProjectId: number): Promise<IProject[]> => {
     const projectId =
       typeof rawProjectId === "string" ? parseInt(rawProjectId) : rawProjectId;
 
@@ -263,13 +263,13 @@ export const projectAPI = {
               description
               like {
                 id
-                userId {
+                user {
                   id
                   login
                 }
               }
               projectShare {
-                userId {
+                user {
                   login
                   email
                   id
@@ -293,10 +293,10 @@ export const projectAPI = {
       })
     ).data.addLike as IProject[];
 
-    return updatedProject[0]?.like?.length || 0;
+    return updatedProject;
   },
 
-  removeLike: async (rawProjectId: number | string): Promise<number> => {
+  removeLike: async (rawProjectId: number | string): Promise<IProject[]> => {
     const projectId =
       typeof rawProjectId === "string" ? parseInt(rawProjectId) : rawProjectId;
 
@@ -311,13 +311,13 @@ export const projectAPI = {
               isPublic
               like {
                 id
-                userId {
+                user {
                   id
                   login
                 }
               }
               projectShare {
-                userId {
+                user {
                   login
                   email
                   id
@@ -338,7 +338,7 @@ export const projectAPI = {
       })
     ).data.removeLike as IProject[];
 
-    return updatedProject[0]?.like?.length || 0;
+    return updatedProject;
   },
 
   update: async (

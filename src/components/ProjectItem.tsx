@@ -2,7 +2,7 @@ import { useNavigate } from "react-router-dom";
 import { IProject } from "../interfaces/IProject";
 import styles from "./ProjectItem.module.scss";
 import ProjectContext from "../contexts/projectContext";
-import React, { useContext } from "react";
+import React, { useContext, useState } from "react";
 import { projectAPI } from "../api/projectAPI";
 import UserContext from "../contexts/userContext";
 import { isLiked } from "../utils/isLiked";
@@ -25,6 +25,8 @@ const ProjectItem = ({
   const { user } = useContext(UserContext);
   const { setShareModal } = useContext(ShareModalContext);
   const { setDeleteModal } = useContext(DeleteModalContext);
+
+  const [state, setState] = useState(false);
 
   const navigate = useNavigate();
   const handleOpenProject = async () => {
@@ -52,19 +54,10 @@ const ProjectItem = ({
   };
 
   const toggleLike = async () => {
-    const userId = user?.id;
-
-    const alreadyLiked =
-      userId !== undefined &&
-      (
-        project.like?.filter(
-          (like) => like.userId.id === parseInt(userId, 10)
-        ) || []
-      ).length > 0;
-
-    if (!alreadyLiked) await projectAPI.addLike(project.id);
-    else await projectAPI.removeLike(project.id);
-
+    state
+      ? await projectAPI.addLike(parseInt(project.id, 10))
+      : await projectAPI.removeLike(project.id);
+    setState((prev) => !prev);
     await getEveryProjects();
   };
 
@@ -126,7 +119,7 @@ const ProjectItem = ({
               alt={isLiked(project, user, "alt")}
               draggable={false}
             />
-            {project.like?.length || 0}
+            {project.like?.length}
           </div>
         </div>
       </div>

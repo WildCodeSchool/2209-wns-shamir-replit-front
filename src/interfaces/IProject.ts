@@ -6,7 +6,8 @@ export type IUserId = {
 
 export type ILike = {
   id: number;
-  userId: Pick<IUserId, "id">;
+  userId: number;
+  projectId: number;
 };
 
 export type IProjectShare = {
@@ -31,7 +32,6 @@ export type IProject = {
 };
 
 export type CreateProject = {
-  userId: number;
   name: string;
   description: string;
   isPublic: boolean;

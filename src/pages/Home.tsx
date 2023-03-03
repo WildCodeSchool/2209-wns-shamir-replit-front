@@ -76,7 +76,7 @@ const Home = () => {
     setPublicProjects(projects);
   };
 
-  const createNewProject = async (project: Omit<CreateProject, "userId">) => {
+  const createNewProject = async (project: CreateProject) => {
     setShowNewProjectModal(false);
     await projectAPI.create(project);
     await getEveryProjects();

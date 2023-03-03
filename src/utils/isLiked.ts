@@ -7,14 +7,17 @@ export const isLiked = (
   target: "src" | "alt"
 ) => {
   const projectLike = project.like;
-  const _userId = user.id;
+  const userId = user.id;
 
   let isLiked = false;
 
-  if (projectLike && projectLike.length && _userId !== undefined) {
+  if (projectLike && projectLike.length && userId !== undefined) {
+    console.log("YOOOOOO", projectLike);
+
     isLiked =
-      projectLike.filter((like) => like.userId.id === parseInt(_userId, 10))
+      projectLike.filter((like) => like.userId === parseInt(userId, 10))
         .length > 0;
+    console.log("HERE", isLiked);
   }
 
   if (target === "src") return isLiked ? "/heart-full.svg" : "/heart-empty.svg";
