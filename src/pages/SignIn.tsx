@@ -56,8 +56,6 @@ const SignIn = () => {
         console.error("error", e);
       }
     }
-<<<<<<< HEAD
-=======
     closeModal();
     return (
       <Stack sx={{ width: "100%" }} spacing={2}>
@@ -66,7 +64,6 @@ const SignIn = () => {
         </Alert>
       </Stack>
     );
->>>>>>> c7d811d7562e93c4358f6d0e292a5ec34636fd12
   };
 
   const openModal = () => {

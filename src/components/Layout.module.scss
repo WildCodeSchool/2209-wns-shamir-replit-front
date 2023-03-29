@@ -2,9 +2,13 @@
 
 .layoutContainer {
   background-color: $main-color-ultralight;
-  & > div {
-    max-width: 1200px;
-    min-height: calc(100vh - $header-height);
-    padding: 10px;
-  }
+  // & > div {
+  //   // max-width: 1200px;
+  // }
+  min-height: calc(100vh - $header-height);
+
+  padding: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }

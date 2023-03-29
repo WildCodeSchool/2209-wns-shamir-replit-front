@@ -12,10 +12,8 @@ const Edit = () => {
     ExecutedCode[] | undefined
   >(undefined);
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [projectFiles, setProjectFiles] = useState<IFiles[]>();
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [filesCodeArr, setFilesCodeArr] = useState<FilesCodeData[]>();
+  const [, setProjectFiles] = useState<IFiles[]>();
+  const [, setFilesCodeArr] = useState<FilesCodeData[]>();
   const [usedFile, setUsedFile] = useState<FilesCodeData>();
   const { project } = useContext(ProjectContext);
   const [editorCode, setEditorCode] = useState("");
@@ -60,12 +58,15 @@ const Edit = () => {
 
   const getFilesInformations = async () => {
     const projectId = project.id;
+    console.log(projectId);
+
     if (projectId !== undefined) {
       const req = await fileAPI.getAllFilesByProjectId(projectId);
       setProjectFiles(req.getFilesByProjectId);
       setFilesCodeArr(req.getCodeFiles);
       setUsedFile(req.getCodeFiles[0]);
       setEditorCode(req.getCodeFiles[0].code);
+      console.log(req);
     }
   };
 
