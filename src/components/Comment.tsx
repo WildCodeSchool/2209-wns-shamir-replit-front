@@ -8,7 +8,7 @@ const CommentSection = () => {
   const [comments, setComments] = useState<Comment[]>([]);
   const [newComment, setNewComment] = useState("");
 
-  const getAllComment = () => {};
+  // const getAllComment = () => {};
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
