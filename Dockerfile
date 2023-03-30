@@ -12,6 +12,7 @@ COPY public /front/public
 COPY .env /front/.env
 COPY tsconfig.json /front/
 RUN npm run build
+RUN npm install -g serve
 CMD ["echo", "baltringue"]
 
 FROM base as dev

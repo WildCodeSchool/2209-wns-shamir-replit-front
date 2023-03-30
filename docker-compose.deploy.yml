@@ -2,15 +2,15 @@ version: '3.8'
 services:
   front:
     image: gnos28/wildcode-front
-    volumes:
-      - ./build:/front/build
-    command: echo boloss
+    # volumes:
+    #   - ./build:/front/build
+    command: serve -s build
     ports:
       - "3000:3000"
-    networks:
-      - dockerlan
+    # networks:
+    #   - dockerlan
     restart: always
 
-networks:
-  dockerlan:
-    driver: bridge
+# networks:
+#   dockerlan:
+#     driver: bridge
