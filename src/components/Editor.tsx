@@ -22,6 +22,8 @@ type EditeurProps = {
   projectId: number;
   coworkers: Coworker[];
   websockets: React.MutableRefObject<Socket[]>;
+  restoreCursor: boolean;
+  setRestoreCursor: React.Dispatch<React.SetStateAction<boolean>>;
 };
 
 type DownloadFile = {
@@ -30,6 +32,11 @@ type DownloadFile = {
 };
 
 type Theme = "light" | "vs-dark";
+
+type CursorPosition = {
+  lineNumber: number;
+  column: number;
+};
 
 const Editeur = (props: EditeurProps) => {
   const [theme, setTheme] = useState<Theme>("light");
@@ -43,25 +50,42 @@ const Editeur = (props: EditeurProps) => {
   // const editor = document.getElementById("resize");
   // const [input, setInput] = useState<string>();
   const editorRef = useRef<monaco.editor.IStandaloneCodeEditor | null>(null);
+  const cursorPositionRef = useRef<CursorPosition>({
+    lineNumber: 1,
+    column: 1,
+  });
 
   const updateCoworkers = () => {
     if (editorRef.current) {
       const decorations = props.coworkers
         .filter((cw) => cw.userId !== parseInt(user.id || "0"))
-        .map((cw) => ({
-          range: {
-            startLineNumber: cw.startLineNumber,
-            startColumn: cw.startColumn,
-            endLineNumber: cw.endLineNumber + 0,
-            endColumn: cw.endColumn + 1,
-          },
-          options: {
-            className: styles.coWorkerCursor,
-            hoverMessage: {
-              value: cw.name,
+        .sort((cw1, cw2) => {
+          if (cw1.name > cw2.name) return 1;
+          if (cw1.name < cw2.name) return -1;
+          return 0;
+        })
+        .map((cw, cwIndex) => {
+          const classIndex = cwIndex % 5;
+          const className = [
+            styles.coWorkerCursor,
+            styles["coWorkerCursor" + classIndex],
+          ].join(" ");
+
+          return {
+            range: {
+              startLineNumber: cw.startLineNumber,
+              startColumn: cw.startColumn,
+              endLineNumber: cw.endLineNumber + 0,
+              endColumn: cw.endColumn + 1,
             },
-          },
-        }));
+            options: {
+              className,
+              hoverMessage: {
+                value: cw.name,
+              },
+            },
+          };
+        });
 
       oldDecorations.current = editorRef.current.deltaDecorations(
         oldDecorations.current,
@@ -77,11 +101,21 @@ const Editeur = (props: EditeurProps) => {
     }
   };
 
+  const setCursorPosition = () => {
+    if (editorRef.current) {
+      editorRef.current.setPosition(cursorPositionRef.current);
+      props.setRestoreCursor(false);
+    }
+  };
+
   const sendCursorPosition = () => {
     if (editorRef.current) {
       const position = editorRef.current.getPosition();
 
       if (position) {
+        cursorPositionRef.current.column = position.column;
+        cursorPositionRef.current.lineNumber = position.lineNumber;
+
         const coworker: Coworker = {
           name: user.login || "",
           project_id: props.projectId,
@@ -152,6 +186,13 @@ const Editeur = (props: EditeurProps) => {
   useEffect(() => {
     updateCoworkers();
   }, [props.coworkers]);
+
+  useEffect(() => {
+    if (props.restoreCursor) {
+      // retrieve previous cursorPosition
+      setCursorPosition();
+    }
+  }, [props.restoreCursor]);
 
   useEffect(() => {
     // do conditional chaining

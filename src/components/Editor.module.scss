@@ -75,10 +75,28 @@
   content: "";
   position: absolute;
   top: 0px;
-  left: 0px;
+  left: -1px;
   height: 100%;
-  width: 3px;
+  width: 4px;
+}
+
+.coWorkerCursor0:after {
   background-color: red;
+}
+.coWorkerCursor1:after {
+  background-color: blue;
+}
+.coWorkerCursor2:after {
+  background-color: green;
+}
+.coWorkerCursor3:after {
+  background-color: yellow;
+}
+.coWorkerCursor4:after {
+  background-color: cyan;
+}
+.coWorkerCursor5:after {
+  background-color: orange;
 }
 
 .coWorkerName {

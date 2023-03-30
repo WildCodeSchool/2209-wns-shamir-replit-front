@@ -27,6 +27,7 @@ const Edit = () => {
   );
   const [forceEditorUpdate, setForceEditorUpdate] = useState(0);
   const [coworkers, setCoworkers] = useState<Coworker[]>([]);
+  const [restoreCursor, setRestoreCursor] = useState(false);
 
   const websockets = useRef<Socket[]>([]);
 
@@ -90,9 +91,8 @@ const Edit = () => {
       setProjectFiles(req.getFilesByProjectId);
       setFilesCodeArr(req.getCodeFiles);
       setUsedFile(req.getCodeFiles[0]);
-
-      console.log(req.getCodeFiles[0].code);
       setEditorCode(req.getCodeFiles[0].code);
+      setRestoreCursor(true);
     }
   };
 
@@ -118,6 +118,8 @@ const Edit = () => {
           fileId={usedFile.id}
           projectId={usedFile?.projectId}
           websockets={websockets}
+          restoreCursor={restoreCursor}
+          setRestoreCursor={setRestoreCursor}
         />
       ) : (
         <p>Loading Editor...</p>
