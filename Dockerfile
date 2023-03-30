@@ -11,7 +11,8 @@ COPY src /front/src
 COPY public /front/public
 COPY .env /front/.env
 COPY tsconfig.json /front/
-CMD ["react-scripts", "build"]
+RUN npm run build
+CMD ["echo", "baltringue"]
 
 FROM base as dev
 ENV NODE_ENV=development
