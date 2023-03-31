@@ -17,7 +17,12 @@
   },
   "plugins": ["react", "@typescript-eslint", "prettier"],
   "rules": {
-    "prettier/prettier": ["error"],
+    "prettier/prettier": [
+      "error",
+      {
+        "endOfLine": "auto"
+      }
+    ],
     "arrow-body-style": ["error", "as-needed"],
     "@typescript-eslint/no-unused-vars": [
       "error",

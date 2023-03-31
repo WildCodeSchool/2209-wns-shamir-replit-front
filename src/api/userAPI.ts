@@ -48,8 +48,6 @@ export const userAPI = {
       })
     ).data.getAllUsers as IUser<string>[];
 
-    console.log("getAll users", users);
-
     return users.map((user) => ({
       ...user,
       id: user.id.toString(),

@@ -57,12 +57,6 @@ const Subscription = () => {
 
     const { date_start_subscription, date_end_subscription } = user;
 
-    console.log(
-      "date_start_subscription, date_end_subscription",
-      typeof date_start_subscription,
-      typeof date_end_subscription
-    );
-
     let newIsSubscribedBase = false;
 
     if (
@@ -108,8 +102,6 @@ const Subscription = () => {
   const showSubscriptionDiv = () => !isSubscribedBase && selectedPlan === "pro";
 
   const handleCheckout = async () => {
-    console.log("handleCheckout", elements, stripe);
-
     if (elements === null || stripe === null) {
       return;
     }
@@ -125,31 +117,21 @@ const Subscription = () => {
       if (paymentMethodResult) {
         const { error, paymentMethod } = paymentMethodResult;
         if (!error) {
-          try {
-            const { id } = paymentMethod;
-            const { data } = await stripeAPI.getStripe(
-              selectedRenewal === "monthly" ? 5 : 48,
-              id
-            );
+          const { id } = paymentMethod;
+          const { data } = await stripeAPI.getStripe(
+            selectedRenewal === "monthly" ? 5 : 48,
+            id
+          );
 
-            if (data?.success) {
-              console.log("alright");
-              setPaymentSuccess(true);
-
-              const { date_start_subscription, date_end_subscription } = data;
-
-              setUser({
-                ...user,
-                date_start_subscription: new Date(date_start_subscription),
-                date_end_subscription: new Date(date_end_subscription),
-              });
-            }
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          } catch (err: any) {
-            console.log(err);
+          if (data?.success) {
+            setPaymentSuccess(true);
+            const { date_start_subscription, date_end_subscription } = data;
+            setUser({
+              ...user,
+              date_start_subscription: new Date(date_start_subscription),
+              date_end_subscription: new Date(date_end_subscription),
+            });
           }
-        } else {
-          console.log("error", error.message);
         }
       }
     }
