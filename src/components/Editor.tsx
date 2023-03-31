@@ -130,8 +130,21 @@ const Editeur = (props: EditeurProps) => {
             position.column,
             position.lineNumber
           );
-          cursorPositionRef.current.column = position.column;
-          cursorPositionRef.current.lineNumber = position.lineNumber;
+
+          // console.log("editorCode", { code: props.editorCode });
+
+          const lines = props.editorCode.split("\n");
+
+          const nbLines = lines.length;
+          const lastLineLength = lines[lines.length - 1].length;
+
+          if (
+            nbLines !== position.lineNumber &&
+            lastLineLength !== position.column
+          ) {
+            cursorPositionRef.current.column = position.column;
+            cursorPositionRef.current.lineNumber = position.lineNumber;
+          }
         }
 
         const coworker: Coworker = {
@@ -213,7 +226,7 @@ const Editeur = (props: EditeurProps) => {
       // retrieve previous cursorPosition
       setCursorPosition();
     }
-  }, [props.restoreCursor]);
+  }, [props.restoreCursor, props.lockCursor]);
 
   useEffect(() => {
     // do conditional chaining
