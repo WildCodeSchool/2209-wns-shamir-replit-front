@@ -162,9 +162,6 @@ const RegisterModal = ({ closeModal, registerNewUser }: RegisterModalProps) => {
               autoFocus
               onBlur={() => verifySingleField("email")}
             />
-            {/* <span className={styles.errorSpan}> */}
-            {/*   {wrongEmail ? "votre email n'est pas valide" : ""} */}
-            {/* </span> */}
             <TextField
               id="outlined-basic"
               label="votre identifiant"
@@ -179,11 +176,6 @@ const RegisterModal = ({ closeModal, registerNewUser }: RegisterModalProps) => {
               error={wrongLogin}
               onBlur={() => verifySingleField("login")}
             />
-            {/* <span className={styles.errorSpan}> */}
-            {/*   {wrongLogin */}
-            {/*     ? 'votre login n\'est pas valide, il doit contenir entre 3 et 15 caractères (minuscules, majuscules, chiffres et "_" "-")' */}
-            {/*     : ""} */}
-            {/* </span> */}
             <TextField
               id="outlined-basic"
               label="votre mot de passe"
@@ -199,11 +191,6 @@ const RegisterModal = ({ closeModal, registerNewUser }: RegisterModalProps) => {
               error={wrongPassword}
               onBlur={() => verifySingleField("password")}
             />
-            {/* <span className={styles.errorSpan}> */}
-            {/*   {wrongPassword */}
-            {/*     ? "votre mot de passe n'est pas valide, il doit contenir au moins 8 caractères dont 1 caractère minuscule, 1 caractère majuscule et 1 caractère spécial" */}
-            {/*     : ""} */}
-            {/* </span> */}
             <Button
               onClick={verifyBeforeRegister}
               variant="contained"

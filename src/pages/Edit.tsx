@@ -28,6 +28,7 @@ const Edit = () => {
   const [forceEditorUpdate, setForceEditorUpdate] = useState(0);
   const [coworkers, setCoworkers] = useState<Coworker[]>([]);
   const [restoreCursor, setRestoreCursor] = useState(false);
+  const [lockCursor, setLockCursor] = useState(false);
 
   const websockets = useRef<Socket[]>([]);
 
@@ -97,6 +98,7 @@ const Edit = () => {
   };
 
   useEffect(() => {
+    setLockCursor(true);
     getFilesInformations();
   }, [forceEditorUpdate]);
 
@@ -120,6 +122,8 @@ const Edit = () => {
           websockets={websockets}
           restoreCursor={restoreCursor}
           setRestoreCursor={setRestoreCursor}
+          lockCursor={lockCursor}
+          setLockCursor={setLockCursor}
         />
       ) : (
         <p>Loading Editor...</p>

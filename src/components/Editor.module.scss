@@ -83,14 +83,15 @@
 .coWorkerCursor:before {
   z-index: 999;
   animation: blink 1s ease-in-out both infinite;
-  padding: 2px 0px 0px 2px;
+  padding: 2px 0px 0px 0px;
+  text-align: center;
   font-size: 14px;
   position: absolute;
   top: -18px;
   left: -10px;
   height: 20px;
+  width: 22px;
   border-radius: 50%;
-  width: 20px;
 }
 
 .coWorkerCursor0:before {

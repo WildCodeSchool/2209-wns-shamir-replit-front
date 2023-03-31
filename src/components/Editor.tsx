@@ -24,6 +24,8 @@ type EditeurProps = {
   websockets: React.MutableRefObject<Socket[]>;
   restoreCursor: boolean;
   setRestoreCursor: React.Dispatch<React.SetStateAction<boolean>>;
+  lockCursor: boolean;
+  setLockCursor: React.Dispatch<React.SetStateAction<boolean>>;
 };
 
 type DownloadFile = {
@@ -57,6 +59,7 @@ const Editeur = (props: EditeurProps) => {
 
   const updateCoworkers = () => {
     if (editorRef.current) {
+      console.log(props.coworkers);
       const decorations = props.coworkers
         .filter((cw) => cw.userId !== parseInt(user.id || "0"))
         .sort((cw1, cw2) => {
@@ -105,6 +108,8 @@ const Editeur = (props: EditeurProps) => {
     if (editorRef.current) {
       editorRef.current.setPosition(cursorPositionRef.current);
       props.setRestoreCursor(false);
+      props.setLockCursor(false);
+      updateCoworkers();
     }
   };
 
@@ -113,8 +118,10 @@ const Editeur = (props: EditeurProps) => {
       const position = editorRef.current.getPosition();
 
       if (position) {
-        cursorPositionRef.current.column = position.column;
-        cursorPositionRef.current.lineNumber = position.lineNumber;
+        if (!props.lockCursor) {
+          cursorPositionRef.current.column = position.column;
+          cursorPositionRef.current.lineNumber = position.lineNumber;
+        }
 
         const coworker: Coworker = {
           name: user.login || "",
@@ -184,7 +191,7 @@ const Editeur = (props: EditeurProps) => {
   };
 
   useEffect(() => {
-    updateCoworkers();
+    if (!props.lockCursor) updateCoworkers();
   }, [props.coworkers]);
 
   useEffect(() => {
