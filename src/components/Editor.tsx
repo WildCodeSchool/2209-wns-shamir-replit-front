@@ -105,7 +105,11 @@ const Editeur = (props: EditeurProps) => {
   };
 
   const setCursorPosition = () => {
-    console.log("setCursorPosition (restore cursor position)");
+    console.log(
+      "*** restore cursor position",
+      cursorPositionRef.current.column,
+      cursorPositionRef.current.lineNumber
+    );
     if (editorRef.current) {
       editorRef.current.setPosition(cursorPositionRef.current);
       props.setRestoreCursor(false);
@@ -119,7 +123,13 @@ const Editeur = (props: EditeurProps) => {
       const position = editorRef.current.getPosition();
 
       if (position) {
+        // save cursor position
         if (!props.lockCursor) {
+          console.log(
+            "*** save cursor position",
+            position.column,
+            position.lineNumber
+          );
           cursorPositionRef.current.column = position.column;
           cursorPositionRef.current.lineNumber = position.lineNumber;
         }
