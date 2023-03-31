@@ -59,7 +59,7 @@ const Editeur = (props: EditeurProps) => {
 
   const updateCoworkers = () => {
     if (editorRef.current) {
-      console.log("updateCoworkers", props.coworkers);
+      // console.log("updateCoworkers", props.coworkers);
       const decorations = props.coworkers
         .filter((cw) => cw.userId !== parseInt(user.id || "0"))
         .sort((cw1, cw2) => {
@@ -105,11 +105,11 @@ const Editeur = (props: EditeurProps) => {
   };
 
   const setCursorPosition = () => {
-    console.log(
-      "*** restore cursor position",
-      cursorPositionRef.current.column,
-      cursorPositionRef.current.lineNumber
-    );
+    // console.log(
+    //   "*** restore cursor position",
+    //   cursorPositionRef.current.column,
+    //   cursorPositionRef.current.lineNumber
+    // );
     if (editorRef.current) {
       editorRef.current.setPosition(cursorPositionRef.current);
       props.setRestoreCursor(false);
@@ -125,11 +125,11 @@ const Editeur = (props: EditeurProps) => {
       if (position) {
         // save cursor position
         if (!props.lockCursor) {
-          console.log(
-            "*** save cursor position",
-            position.column,
-            position.lineNumber
-          );
+          // console.log(
+          //   "*** save cursor position",
+          //   position.column,
+          //   position.lineNumber
+          // );
 
           // console.log("editorCode", { code: props.editorCode });
 
@@ -198,7 +198,7 @@ const Editeur = (props: EditeurProps) => {
     const res = (await projectAPI.downloadProject(
       props.projectId
     )) as DownloadFile;
-    console.log(res);
+    // console.log(res);
     const href = URL.createObjectURL(res.data);
 
     // create "a" HTML element with href to file & click
@@ -215,13 +215,13 @@ const Editeur = (props: EditeurProps) => {
   };
 
   useEffect(() => {
-    console.log("useEffect coworkers / lockCursor", props.lockCursor);
+    // console.log("useEffect coworkers / lockCursor", props.lockCursor);
     // if (!props.lockCursor)
     updateCoworkers();
   }, [props.coworkers, props.lockCursor]);
 
   useEffect(() => {
-    console.log("useEffect restoreCursor", props.restoreCursor);
+    // console.log("useEffect restoreCursor", props.restoreCursor);
     if (props.restoreCursor) {
       // retrieve previous cursorPosition
       setCursorPosition();
