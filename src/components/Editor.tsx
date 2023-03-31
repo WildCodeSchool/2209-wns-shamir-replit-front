@@ -45,6 +45,7 @@ const Editeur = (props: EditeurProps) => {
   const { project } = useContext(ProjectContext);
   const { user } = useContext(UserContext);
   const oldDecorations = useRef<string[]>([]);
+  const isTyping = useRef<boolean>(false);
 
   // State Booléen pour savoir si le document est sauvegarder en ligne
   const [isSaveOnline, setIsSaveOnline] = useState(true);
@@ -60,7 +61,11 @@ const Editeur = (props: EditeurProps) => {
   const updateCoworkers = () => {
     if (editorRef.current) {
       // console.log("updateCoworkers", props.coworkers);
-      const decorations = props.coworkers
+
+      const uniqueCoworkers = [...props.coworkers.map((cw) => cw.userId)];
+
+      const decorations = uniqueCoworkers
+        .map((ucwId) => props.coworkers.filter((cw) => cw.userId === ucwId)[0])
         .filter((cw) => cw.userId !== parseInt(user.id || "0"))
         .sort((cw1, cw2) => {
           if (cw1.name > cw2.name) return 1;
@@ -98,6 +103,7 @@ const Editeur = (props: EditeurProps) => {
   };
 
   const getMonacoText = () => {
+    isTyping.current = true;
     setIsSaveOnline(false);
     if (editorRef.current) {
       props.updateCode(editorRef.current.getValue());
@@ -105,12 +111,12 @@ const Editeur = (props: EditeurProps) => {
   };
 
   const setCursorPosition = () => {
-    // console.log(
-    //   "*** restore cursor position",
-    //   cursorPositionRef.current.column,
-    //   cursorPositionRef.current.lineNumber
-    // );
-    if (editorRef.current) {
+    console.log(
+      "*** restore cursor position",
+      cursorPositionRef.current.column,
+      cursorPositionRef.current.lineNumber
+    );
+    if (editorRef.current && !isTyping.current) {
       editorRef.current.setPosition(cursorPositionRef.current);
       props.setRestoreCursor(false);
       props.setLockCursor(false);
@@ -232,12 +238,15 @@ const Editeur = (props: EditeurProps) => {
     // do conditional chaining
     monacoHook?.languages.typescript.javascriptDefaults.setEagerModelSync(true);
     const willUpdate = setTimeout(async () => {
+      isTyping.current = false;
       const res = await props.updateFileCodeOnline(
         props.editorCode,
         props.fileId,
         props.projectId
       );
-      if (res !== false && res !== undefined) setIsSaveOnline(true);
+      if (res !== false && res !== undefined) {
+        setIsSaveOnline(true);
+      }
     }, 500);
     return () => clearTimeout(willUpdate);
   }, [monacoHook, props.editorCode]);
