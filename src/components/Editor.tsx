@@ -59,7 +59,7 @@ const Editeur = (props: EditeurProps) => {
 
   const updateCoworkers = () => {
     if (editorRef.current) {
-      console.log(props.coworkers);
+      console.log("updateCoworkers", props.coworkers);
       const decorations = props.coworkers
         .filter((cw) => cw.userId !== parseInt(user.id || "0"))
         .sort((cw1, cw2) => {
@@ -194,7 +194,7 @@ const Editeur = (props: EditeurProps) => {
   useEffect(() => {
     console.log("useEffect coworkers / lockCursor", props.lockCursor);
     if (!props.lockCursor) updateCoworkers();
-  }, [props.coworkers]);
+  }, [props.coworkers, props.lockCursor]);
 
   useEffect(() => {
     console.log("useEffect restoreCursor", props.restoreCursor);

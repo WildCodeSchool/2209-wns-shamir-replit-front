@@ -94,6 +94,7 @@ const Edit = () => {
       setUsedFile(req.getCodeFiles[0]);
       setEditorCode(req.getCodeFiles[0].code);
       setRestoreCursor(true);
+      setLockCursor(false);
     }
   };
 
