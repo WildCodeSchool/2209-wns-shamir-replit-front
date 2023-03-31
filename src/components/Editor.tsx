@@ -65,7 +65,7 @@ const Editeur = (props: EditeurProps) => {
           return 0;
         })
         .map((cw, cwIndex) => {
-          const classIndex = cwIndex % 5;
+          const classIndex = cwIndex % 6;
           const className = [
             styles.coWorkerCursor,
             styles["coWorkerCursor" + classIndex],
