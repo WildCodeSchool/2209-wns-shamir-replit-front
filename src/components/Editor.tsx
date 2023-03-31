@@ -105,7 +105,7 @@ const Editeur = (props: EditeurProps) => {
   };
 
   const setCursorPosition = () => {
-    console.log("setCursorPosition");
+    console.log("setCursorPosition (restore cursor position)");
     if (editorRef.current) {
       editorRef.current.setPosition(cursorPositionRef.current);
       props.setRestoreCursor(false);
@@ -193,7 +193,8 @@ const Editeur = (props: EditeurProps) => {
 
   useEffect(() => {
     console.log("useEffect coworkers / lockCursor", props.lockCursor);
-    if (!props.lockCursor) updateCoworkers();
+    // if (!props.lockCursor)
+    updateCoworkers();
   }, [props.coworkers, props.lockCursor]);
 
   useEffect(() => {

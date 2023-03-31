@@ -94,7 +94,7 @@ const Edit = () => {
       setUsedFile(req.getCodeFiles[0]);
       setEditorCode(req.getCodeFiles[0].code);
       setRestoreCursor(true);
-      setLockCursor(false);
+      // setLockCursor(false);
     }
   };
 
@@ -102,6 +102,10 @@ const Edit = () => {
     setLockCursor(true);
     getFilesInformations();
   }, [forceEditorUpdate]);
+
+  useEffect(() => {
+    setLockCursor(false);
+  }, [editorCode]);
 
   useEffect(() => {
     getFilesInformations();
