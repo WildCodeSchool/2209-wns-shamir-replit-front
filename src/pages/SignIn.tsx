@@ -5,24 +5,36 @@ import { TextField } from "@mui/material";
 import Alert from "@mui/material/Alert";
 import Stack from "@mui/material/Stack";
 import Button from "@mui/material/Button/Button";
+import Snackbar from "@mui/material/Snackbar";
 import { userAPI } from "../api/userAPI";
 import { authAPI } from "../api/authAPI";
 import UserContext from "../contexts/userContext";
 import RegisterModal from "../components/RegisterModal";
 import { CreateUser } from "../interfaces/IUser";
 import { api } from "../api/_graphQL";
+import IconButton from "@mui/material/IconButton";
+import CloseIcon from "@mui/icons-material/Close";
 
 const SignIn = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [modal, setModal] = useState<boolean>(false);
+  const [openToast, setOpenToast] = useState<boolean>(false);
   const { setUser } = useContext(UserContext);
 
   const navigate = useNavigate();
   const token = localStorage.getItem("token");
 
   const handleLogin = async () => {
-    const { token, userId } = await authAPI.getToken(email, password);
+    const { status, data } = await authAPI.getToken(email, password);
+
+    if (status !== 200 || data === undefined) {
+      console.log("bolosss");
+      setOpenToast(true);
+      return;
+    }
+
+    const { token, userId } = data;
 
     localStorage.setItem("userId", userId.toString());
     localStorage.setItem("token", token);
@@ -65,6 +77,32 @@ const SignIn = () => {
       </Stack>
     );
   };
+
+  const handleCloseToast = (
+    _event: React.SyntheticEvent | Event,
+    reason?: string
+  ) => {
+    if (reason === "clickaway") {
+      return;
+    }
+
+    setOpenToast(false);
+  };
+  const toastAction = (
+    <React.Fragment>
+      <Alert severity="error">
+        Mauvais identifiant / mot de passe
+        <IconButton
+          size="small"
+          aria-label="close"
+          color="inherit"
+          onClick={handleCloseToast}
+        >
+          <CloseIcon fontSize="small" />
+        </IconButton>
+      </Alert>
+    </React.Fragment>
+  );
 
   const openModal = () => {
     setModal(true);
@@ -129,6 +167,12 @@ const SignIn = () => {
           registerNewUser={registerNewUser}
         />
       )}
+      <Snackbar
+        open={openToast}
+        autoHideDuration={6000}
+        onClose={handleCloseToast}
+        action={toastAction}
+      />
     </>
   );
 };

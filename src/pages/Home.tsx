@@ -54,7 +54,7 @@ const Home = () => {
   };
 
   const handleSearch = (
-    event: React.SyntheticEvent,
+    _event: React.SyntheticEvent,
     newValue: string | null
   ) => {
     setSearchValue(newValue || undefined);

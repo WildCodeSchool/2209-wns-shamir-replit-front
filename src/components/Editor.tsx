@@ -5,6 +5,9 @@ import * as monaco from "monaco-editor/esm/vs/editor/editor.api";
 import { updateRes } from "../api/fileAPI";
 import { projectAPI } from "../api/projectAPI";
 import ProjectContext from "../contexts/projectContext";
+import { Coworker, coworkerAPI } from "../api/coworkerAPI";
+import { Socket } from "socket.io-client";
+import UserContext from "../contexts/userContext";
 
 type EditeurProps = {
   sendMonaco: (code: string) => Promise<void>;
@@ -17,6 +20,12 @@ type EditeurProps = {
   ) => Promise<false | updateRes | undefined>;
   fileId: number;
   projectId: number;
+  coworkers: Coworker[];
+  websockets: React.MutableRefObject<Socket[]>;
+  restoreCursor: boolean;
+  setRestoreCursor: React.Dispatch<React.SetStateAction<boolean>>;
+  lockCursor: boolean;
+  setLockCursor: React.Dispatch<React.SetStateAction<boolean>>;
 };
 
 type DownloadFile = {
@@ -26,9 +35,17 @@ type DownloadFile = {
 
 type Theme = "light" | "vs-dark";
 
+type CursorPosition = {
+  lineNumber: number;
+  column: number;
+};
+
 const Editeur = (props: EditeurProps) => {
   const [theme, setTheme] = useState<Theme>("light");
   const { project } = useContext(ProjectContext);
+  const { user } = useContext(UserContext);
+  const oldDecorations = useRef<string[]>([]);
+  const isTyping = useRef<boolean>(false);
 
   // State Booléen pour savoir si le document est sauvegarder en ligne
   const [isSaveOnline, setIsSaveOnline] = useState(true);
@@ -36,10 +53,127 @@ const Editeur = (props: EditeurProps) => {
   // const editor = document.getElementById("resize");
   // const [input, setInput] = useState<string>();
   const editorRef = useRef<monaco.editor.IStandaloneCodeEditor | null>(null);
+  const cursorPositionRef = useRef<CursorPosition>({
+    lineNumber: 1,
+    column: 1,
+  });
+
+  const updateCoworkers = () => {
+    if (editorRef.current) {
+      // console.log("updateCoworkers", props.coworkers);
+
+      const uniqueCoworkers = [...props.coworkers.map((cw) => cw.userId)];
+
+      const decorations = uniqueCoworkers
+        .map((ucwId) => props.coworkers.filter((cw) => cw.userId === ucwId)[0])
+        .filter((cw) => cw.userId !== parseInt(user.id || "0"))
+        .sort((cw1, cw2) => {
+          if (cw1.name > cw2.name) return 1;
+          if (cw1.name < cw2.name) return -1;
+          return 0;
+        })
+        .map((cw, cwIndex) => {
+          const classIndex = cwIndex % 6;
+          const className = [
+            styles.coWorkerCursor,
+            styles["coWorkerCursor" + classIndex],
+          ].join(" ");
+
+          return {
+            range: {
+              startLineNumber: cw.startLineNumber,
+              startColumn: cw.startColumn,
+              endLineNumber: cw.endLineNumber + 0,
+              endColumn: cw.endColumn + 1,
+            },
+            options: {
+              className,
+              hoverMessage: {
+                value: cw.name,
+              },
+            },
+          };
+        });
+
+      oldDecorations.current = editorRef.current.deltaDecorations(
+        oldDecorations.current,
+        decorations
+      );
+    }
+  };
 
   const getMonacoText = () => {
+    isTyping.current = true;
     setIsSaveOnline(false);
-    if (editorRef.current) props.updateCode(editorRef.current.getValue());
+    if (editorRef.current) {
+      props.updateCode(editorRef.current.getValue());
+    }
+  };
+
+  const setCursorPosition = () => {
+    console.log(
+      "*** restore cursor position",
+      cursorPositionRef.current.column,
+      cursorPositionRef.current.lineNumber
+    );
+    if (editorRef.current && !isTyping.current) {
+      editorRef.current.setPosition(cursorPositionRef.current);
+      props.setRestoreCursor(false);
+      props.setLockCursor(false);
+      updateCoworkers();
+    }
+  };
+
+  const sendCursorPosition = () => {
+    if (editorRef.current) {
+      const position = editorRef.current.getPosition();
+
+      if (position) {
+        // save cursor position
+        if (!props.lockCursor) {
+          // console.log(
+          //   "*** save cursor position",
+          //   position.column,
+          //   position.lineNumber
+          // );
+
+          // console.log("editorCode", { code: props.editorCode });
+
+          const lines = props.editorCode.split("\n");
+
+          const nbLines = lines.length;
+          const lastLineLength = lines[lines.length - 1].length;
+
+          if (
+            nbLines !== position.lineNumber &&
+            lastLineLength !== position.column
+          ) {
+            cursorPositionRef.current.column = position.column;
+            cursorPositionRef.current.lineNumber = position.lineNumber;
+          }
+        }
+
+        const coworker: Coworker = {
+          name: user.login || "",
+          project_id: props.projectId,
+          userId: parseInt(user.id || "0"),
+          startLineNumber: position.lineNumber,
+          startColumn: position.column,
+          endLineNumber: position.lineNumber,
+          endColumn: position.column,
+        };
+
+        const socketIds: string[] = props.websockets.current.map(
+          (socket) => socket.id
+        );
+
+        coworkerAPI.sendCoworker({
+          socketIds,
+
+          coworker,
+        });
+      }
+    }
   };
 
   const monacoHook = useMonaco();
@@ -70,7 +204,7 @@ const Editeur = (props: EditeurProps) => {
     const res = (await projectAPI.downloadProject(
       props.projectId
     )) as DownloadFile;
-    console.log(res);
+    // console.log(res);
     const href = URL.createObjectURL(res.data);
 
     // create "a" HTML element with href to file & click
@@ -87,16 +221,33 @@ const Editeur = (props: EditeurProps) => {
   };
 
   useEffect(() => {
+    // console.log("useEffect coworkers / lockCursor", props.lockCursor);
+    // if (!props.lockCursor)
+    updateCoworkers();
+  }, [props.coworkers, props.lockCursor]);
+
+  useEffect(() => {
+    // console.log("useEffect restoreCursor", props.restoreCursor);
+    if (props.restoreCursor) {
+      // retrieve previous cursorPosition
+      setCursorPosition();
+    }
+  }, [props.restoreCursor, props.lockCursor]);
+
+  useEffect(() => {
     // do conditional chaining
     monacoHook?.languages.typescript.javascriptDefaults.setEagerModelSync(true);
     const willUpdate = setTimeout(async () => {
+      isTyping.current = false;
       const res = await props.updateFileCodeOnline(
         props.editorCode,
         props.fileId,
         props.projectId
       );
-      if (res !== false && res !== undefined) setIsSaveOnline(true);
-    }, 2000);
+      if (res !== false && res !== undefined) {
+        setIsSaveOnline(true);
+      }
+    }, 500);
     return () => clearTimeout(willUpdate);
   }, [monacoHook, props.editorCode]);
 
@@ -120,7 +271,12 @@ const Editeur = (props: EditeurProps) => {
         </div>
       </div>
 
-      <div className={styles.resizable} id="resize">
+      <div
+        className={styles.resizable}
+        id="resize"
+        onKeyUp={sendCursorPosition}
+        onClick={sendCursorPosition}
+      >
         {props.fileId ? (
           <Editor
             height="50vh"
@@ -128,7 +284,8 @@ const Editeur = (props: EditeurProps) => {
             theme={theme}
             onMount={handleEditorDidMount}
             onChange={getMonacoText}
-            defaultValue={props.editorCode}
+            // defaultValue={props.editorCode}
+            value={props.editorCode}
           />
         ) : (
           <p>Test</p>

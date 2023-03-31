@@ -48,6 +48,7 @@ const CommentSection: React.FC<{ comments: Comment[] }> = ({ comments }) => {
   const [replyToCommentId, setReplyToCommentId] = useState<number | null>(null);
   const [commentsState, setCommentsState] = useState(comments);
 
+<<<<<<< HEAD
   const handleAddComment = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const newComment = {
@@ -59,6 +60,9 @@ const CommentSection: React.FC<{ comments: Comment[] }> = ({ comments }) => {
     setNewReplyText("");
     setCommentsState(updatedComments);
   };
+=======
+  // const getAllComment = () => {};
+>>>>>>> origin/dev
 
   const handleAddReply = (commentId: number) => {
     const newReply = {
