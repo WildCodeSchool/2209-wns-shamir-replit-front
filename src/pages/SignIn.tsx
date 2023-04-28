@@ -29,7 +29,6 @@ const SignIn = () => {
     const { status, data } = await authAPI.getToken(email, password);
 
     if (status !== 200 || data === undefined) {
-      console.log("bolosss");
       setOpenToast(true);
       return;
     }

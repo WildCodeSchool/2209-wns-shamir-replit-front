@@ -54,7 +54,7 @@ export const projectAPI = {
       })
     ).data.createProject as IProject;
 
-    return { ...newProject, id: newProject.id.toString() };
+    return { ...newProject, id: newProject.id };
   },
 
   getAll: async (): Promise<IProject[]> => {
@@ -67,12 +67,12 @@ export const projectAPI = {
                 description
                 like {
                   id
-                  userId {
+                  user {
                     id
                   }
                 }
                 projectShare {
-                  userId {
+                  user {
                     login
                     email
                     id
@@ -87,7 +87,7 @@ export const projectAPI = {
                 isPublic
                 name
                 nb_views
-                userId {
+                user {
                   id
                   login
                 }
@@ -100,7 +100,7 @@ export const projectAPI = {
       return (
         projects?.map((projects) => ({
           ...projects,
-          id: projects.id.toString(),
+          id: projects.id,
         })) || []
       );
     } catch (e) {
@@ -152,7 +152,7 @@ export const projectAPI = {
       return (
         projects?.map((projects) => ({
           ...projects,
-          id: projects.id.toString(),
+          id: projects.id,
         })) || []
       );
     } catch (e) {
@@ -175,7 +175,7 @@ export const projectAPI = {
       })
     ).data.deleteProject as IProject;
 
-    return { ...project, id: project.id.toString() };
+    return { ...project, id: project.id };
   },
 
   getPublic: async (): Promise<IProject[]> => {
@@ -221,7 +221,7 @@ export const projectAPI = {
       return (
         projects?.map((projects) => ({
           ...projects,
-          id: projects.id.toString(),
+          id: projects.id,
         })) || []
       );
     } catch (e) {

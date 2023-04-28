@@ -5,6 +5,7 @@ import ProjectContext from "../contexts/projectContext";
 import React, { useContext } from "react";
 import { projectAPI } from "../api/projectAPI";
 import UserContext from "../contexts/userContext";
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { isLiked } from "../utils/isLiked";
 import ShareModalContext from "../contexts/shareModalContext";
 import DeleteModalContext from "../contexts/deleteModalContext";
@@ -38,7 +39,7 @@ const ProjectItem = ({
 
     if (projectId) {
       setProject(project);
-      setShareModal({ projectId: parseInt(projectId, 10) });
+      setShareModal({ projectId: projectId });
     }
   };
 
@@ -47,7 +48,7 @@ const ProjectItem = ({
 
     if (projectId) {
       setProject(project);
-      setDeleteModal({ projectId: parseInt(projectId, 10) });
+      setDeleteModal({ projectId: projectId });
     }
   };
 
@@ -121,11 +122,11 @@ const ProjectItem = ({
           </div>
 
           <div className={styles.like} onClick={toggleLike}>
-            <img
+            {/* <img
               src={isLiked(project, user, "src")}
               alt={isLiked(project, user, "alt")}
               draggable={false}
-            />
+            /> */}
             {project.like?.length || 0}
           </div>
         </div>

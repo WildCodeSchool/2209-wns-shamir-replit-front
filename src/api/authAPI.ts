@@ -34,8 +34,6 @@ export const authAPI = {
         ).data.getToken
       ) as GetToken;
 
-      console.log("getTokenReturn", getTokenReturn);
-
       return {
         status: 200,
         data: getTokenReturn,

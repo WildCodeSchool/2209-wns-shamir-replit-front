@@ -1,6 +1,6 @@
 import { IUser } from "./IUser";
 
-export type IFiles = {
+export type IFileData = {
   id: number;
   id_storage_file: string;
   name: string;
@@ -9,7 +9,7 @@ export type IFiles = {
   projectId?: number;
 };
 
-export type FilesCodeData = {
+export type IFileCodeData = {
   id: number;
   projectId: number;
   name: string;

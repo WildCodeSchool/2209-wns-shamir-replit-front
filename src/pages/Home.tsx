@@ -148,11 +148,9 @@ const Home = () => {
         size="small"
         options={getSearchFields()}
         sx={{
-          width: "auto",
-          height: "auto",
+          width: "40%",
           fontSize: "12px",
           font: "initial",
-          backgroundColor: "white",
         }}
         renderInput={(params) => (
           <TextField

@@ -2,7 +2,7 @@ import React, { useEffect, useState, useRef, useContext } from "react";
 import styles from "./Editor.module.scss";
 import Editor, { Monaco, useMonaco } from "@monaco-editor/react";
 import * as monaco from "monaco-editor/esm/vs/editor/editor.api";
-import { updateRes } from "../api/fileAPI";
+// import { updateRes } from "../api/fileAPI";
 import { projectAPI } from "../api/projectAPI";
 import ProjectContext from "../contexts/projectContext";
 import { Coworker, coworkerAPI } from "../api/coworkerAPI";
@@ -17,7 +17,7 @@ type EditeurProps = {
     codeToPush: string,
     fileId: number,
     projectId: number
-  ) => Promise<false | updateRes | undefined>;
+  ) => Promise<boolean>;
   fileId: number;
   projectId: number;
   coworkers: Coworker[];
@@ -111,11 +111,6 @@ const Editeur = (props: EditeurProps) => {
   };
 
   const setCursorPosition = () => {
-    console.log(
-      "*** restore cursor position",
-      cursorPositionRef.current.column,
-      cursorPositionRef.current.lineNumber
-    );
     if (editorRef.current && !isTyping.current) {
       editorRef.current.setPosition(cursorPositionRef.current);
       props.setRestoreCursor(false);
@@ -252,46 +247,48 @@ const Editeur = (props: EditeurProps) => {
   }, [monacoHook, props.editorCode]);
 
   return (
-    <div className={styles.container}>
-      <div className={styles.topbar}>
-        <button onClick={execute}>
-          <img src="/start.svg" alt="execute code" draggable={false} />
-        </button>
-        <p>{isSaveOnline ? "Sauvegarde réussie" : "Non sauvegardé"}</p>
-        <div className={styles.rightPanel}>
-          <img
-            src="/download.png"
-            alt="project doawnload"
-            className={styles.imgBtn}
-            onClick={downloadProject}
-          />
-          <button onClick={toggleTheme} className={styles.themeBtn}>
-            {theme === "light" ? "light mode" : "dark mode"}
+    <>
+      <div className={styles.container}>
+        <div className={styles.topbar}>
+          <button onClick={execute}>
+            <img src="/start.svg" alt="execute code" draggable={false} />
           </button>
+          <p>{isSaveOnline ? "Sauvegarde réussie" : "Non sauvegardé"}</p>
+          <div className={styles.rightPanel}>
+            <img
+              src="/download.png"
+              alt="project doawnload"
+              className={styles.imgBtn}
+              onClick={downloadProject}
+            />
+            <button onClick={toggleTheme} className={styles.themeBtn}>
+              {theme === "light" ? "light mode" : "dark mode"}
+            </button>
+          </div>
+        </div>
+
+        <div
+          className={styles.resizable}
+          id="resize"
+          onKeyUp={sendCursorPosition}
+          onClick={sendCursorPosition}
+        >
+          {props.fileId ? (
+            <Editor
+              height="50vh"
+              defaultLanguage="javascript"
+              theme={theme}
+              onMount={handleEditorDidMount}
+              onChange={getMonacoText}
+              defaultValue={"LOEEL"}
+              value={props.editorCode}
+            />
+          ) : (
+            <p>Test</p>
+          )}
         </div>
       </div>
-
-      <div
-        className={styles.resizable}
-        id="resize"
-        onKeyUp={sendCursorPosition}
-        onClick={sendCursorPosition}
-      >
-        {props.fileId ? (
-          <Editor
-            height="50vh"
-            defaultLanguage="javascript"
-            theme={theme}
-            onMount={handleEditorDidMount}
-            onChange={getMonacoText}
-            // defaultValue={props.editorCode}
-            value={props.editorCode}
-          />
-        ) : (
-          <p>Test</p>
-        )}
-      </div>
-    </div>
+    </>
   );
 };
 

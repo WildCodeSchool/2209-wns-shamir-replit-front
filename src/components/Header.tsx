@@ -6,7 +6,7 @@ import UserContext from "../contexts/userContext";
 import { projectAPI } from "../api/projectAPI";
 import { ILike } from "../interfaces/IProject";
 import ShareModalContext from "../contexts/shareModalContext";
-import { isLiked } from "../utils/isLiked";
+// import { isLiked } from "../utils/isLiked";
 import { Avatar, Tooltip } from "@mui/material";
 import { userAPI } from "../api/userAPI";
 import ForceProjectListUpdateContext from "../contexts/forceProjectListUpdateContext";
@@ -27,9 +27,8 @@ const Header = () => {
   const handleToggleModal = () => {
     const projectId = project.id;
 
-    if (projectId) setShareModal({ projectId: parseInt(projectId, 10) });
+    if (projectId) setShareModal({ projectId: projectId });
   };
-
   const getInitialFromLogin = (login: string | undefined) => {
     if (!login) return " ";
 
@@ -128,13 +127,13 @@ const Header = () => {
               className={styles.img}
               onClick={handleToggleModal}
             />
-            <img
-              src={isLiked(project, user, "src")}
-              alt={isLiked(project, user, "alt")}
+            {/* <img
+              // src={isLiked(project, user, "src")}
+              // alt={isLiked(project, user, "alt")}
               draggable={false}
               className={styles.img}
               onClick={toggleLike}
-            />
+            /> */}
           </div>
         )}
 

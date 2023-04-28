@@ -27,14 +27,10 @@ export const websocket = {
         console.info("socket connected !", socket.id);
 
         socket.on("refresh editor", async (_arg) => {
-          console.log("refresh editor");
-
           setForceEditorUpdate(new Date().getTime());
         });
 
         socket.on("refresh cursor", async (_arg: Coworker[]) => {
-          console.log("refresh cursor");
-
           setCoworkers(_arg);
         });
 

@@ -1,3 +1,5 @@
+import { IUser } from "./IUser";
+
 export type IUserId = {
   id: number;
   login: string;
@@ -18,7 +20,7 @@ export type IProjectShare = {
 };
 
 export type IProject = {
-  id: string;
+  id: number;
   id_storage_number: string;
   name: string;
   description: string;
@@ -27,7 +29,7 @@ export type IProject = {
   projectShare?: IProjectShare[];
   nb_views: number;
   file: { language: string }[];
-  userId?: Omit<IUserId, "email">;
+  userId?: IUser;
 };
 
 export type CreateProject = {

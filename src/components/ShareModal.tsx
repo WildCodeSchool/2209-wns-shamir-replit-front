@@ -77,7 +77,7 @@ const ShareModal = ({ closeShareModal }: ShareModalProps) => {
         const { id: userId, login, email } = userListFiltered[0];
 
         const id = await projectShareAPI.create({
-          projectId: parseInt(projectId, 10),
+          projectId: projectId,
           userId: parseInt(userId, 10),
           comment: false,
           write: false,

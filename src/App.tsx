@@ -13,7 +13,6 @@ import SignIn from "./pages/SignIn";
 import Subscription from "./pages/Subscription";
 import { loadStripe } from "@stripe/stripe-js";
 import { Elements } from "@stripe/react-stripe-js";
-import CommentSection from "./components/Comment";
 
 function App() {
   const { REACT_APP_STRIPE_PUBLIC_KEY } = process.env;
@@ -31,15 +30,7 @@ function App() {
                 <Layout>
                   <Routes>
                     <Route path="/" element={<Home />} />
-                    <Route
-                      path="/edit"
-                      element={
-                        <>
-                          <Edit />
-                          <CommentSection />
-                        </>
-                      }
-                    />
+                    <Route path="/edit" element={<Edit />} />
                     <Route path="/subscription" element={<Subscription />} />
                     <Route path="/login" element={<SignIn />} />
                   </Routes>

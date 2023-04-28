@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import React, { useContext, useEffect, useRef, useState } from "react";
 import Editor from "../components/Editor";
 import Console from "../components/Console";
@@ -6,18 +7,17 @@ import styles from "./Edit.module.scss";
 import ProjectContext from "../contexts/projectContext";
 import { fileAPI } from "../api/fileAPI";
 import { Socket } from "socket.io-client";
-import { IFiles, FilesCodeData } from "../interfaces/iFile";
+import { IFileData, IFileCodeData } from "../interfaces/iFile";
 import { websocket } from "../api/websocket";
 import { Coworker } from "../api/coworkerAPI";
+import CommentSection from "../components/Comment";
 
 const Edit = () => {
   const [consoleResult, setConsoleResult] = useState<
     ExecutedCode[] | undefined
   >(undefined);
 
-  const [, setProjectFiles] = useState<IFiles[]>();
-  const [, setFilesCodeArr] = useState<FilesCodeData[]>();
-  const [usedFile, setUsedFile] = useState<FilesCodeData>();
+  const [usedFile, setUsedFile] = useState<IFileCodeData>();
   const { project } = useContext(ProjectContext);
   const [editorCode, setEditorCode] = useState("");
   const [nbExecutions, setNbExecutions] = useState<number | undefined>(
@@ -39,29 +39,28 @@ const Edit = () => {
   const websocketConnect = async () => {
     websocketDisconnect();
 
-    websockets.current.push(
-      await websocket.connect(
-        { project_id: parseInt(project.id || "0") },
-        setForceEditorUpdate,
-        setCoworkers
-      )
-    );
+    // websockets.current.push(
+    //   await websocket.connect(project.id, setForceEditorUpdate, setCoworkers)
+    // );
   };
-
-  const updateFileCodeOnline = async (
+  async function updateFileCodeOnline(
     codeToPush: string,
     fileId: number,
     projectId: number
-  ) => {
-    if (usedFile) {
-      try {
-        return await fileAPI.updateFileOnline(codeToPush, fileId, projectId);
-      } catch (e) {
-        return false;
-      }
+  ): Promise<boolean> {
+    if (!usedFile) {
+      return false;
     }
-    return false;
-  };
+    try {
+      await fileAPI.updateFileOnline(codeToPush, fileId, projectId);
+      return true;
+    } catch (error) {
+      console.error(
+        `Failed to update file with id ${fileId} in project ${projectId}. Error message: ${error}`
+      );
+      return false;
+    }
+  }
 
   const updateCode = async (value: string) => {
     setEditorCode(value);
@@ -71,10 +70,7 @@ const Edit = () => {
     const projectId = project.id;
 
     if (projectId) {
-      const { data, status } = await executeCodeAPI.sendCode(
-        code,
-        parseInt(projectId, 10)
-      );
+      const { data, status } = await executeCodeAPI.sendCode(code, projectId);
 
       if (status === 200 && data) {
         setConsoleResult(data.result);
@@ -84,21 +80,21 @@ const Edit = () => {
   };
 
   const getFilesInformations = async () => {
-    const projectId = project.id;
-    console.log(projectId);
+    if (project.id !== undefined) {
+      const req = await fileAPI.getAllFilesByProjectId(project.id);
 
-    if (projectId !== undefined) {
-      const req = await fileAPI.getAllFilesByProjectId(projectId);
-      setProjectFiles(req.getFilesByProjectId);
-      setFilesCodeArr(req.getCodeFiles);
-      setUsedFile(req.getCodeFiles[0]);
-      setEditorCode(req.getCodeFiles[0].code);
-<<<<<<< HEAD
-      console.log(req);
-=======
+      const newFileCodeData: IFileCodeData = {
+        code: req.getCodeFiles[0].code,
+        id: req.getFilesByProjectId[0].id,
+        language: req.getCodeFiles[0].language,
+        name: req.getCodeFiles[0].name,
+        projectId: req.getCodeFiles[0].projectId,
+      };
+
+      setUsedFile(newFileCodeData);
+      setEditorCode(newFileCodeData.code);
       setRestoreCursor(true);
       // setLockCursor(false);
->>>>>>> origin/dev
     }
   };
 
@@ -118,30 +114,38 @@ const Edit = () => {
   }, [project]);
 
   return (
-    <div className={styles.container}>
+    <>
       {usedFile ? (
-        <Editor
-          sendMonaco={sendMonaco}
-          coworkers={coworkers}
-          editorCode={editorCode}
-          updateCode={updateCode}
-          updateFileCodeOnline={updateFileCodeOnline}
-          fileId={usedFile.id}
-          projectId={usedFile?.projectId}
-          websockets={websockets}
-          restoreCursor={restoreCursor}
-          setRestoreCursor={setRestoreCursor}
-          lockCursor={lockCursor}
-          setLockCursor={setLockCursor}
-        />
+        <div className={styles.containerView}>
+          <div className={styles.container}>
+            <Editor
+              sendMonaco={sendMonaco}
+              coworkers={coworkers}
+              editorCode={editorCode}
+              updateCode={updateCode}
+              updateFileCodeOnline={updateFileCodeOnline}
+              fileId={usedFile.id}
+              projectId={usedFile?.projectId}
+              websockets={websockets}
+              restoreCursor={restoreCursor}
+              setRestoreCursor={setRestoreCursor}
+              lockCursor={lockCursor}
+              setLockCursor={setLockCursor}
+            />
+            <div className={styles.resizeBar}>
+              <img src="/grab.svg" alt="resize" draggable={false} />
+            </div>
+            <Console
+              consoleResult={consoleResult}
+              nbExecutions={nbExecutions}
+            />
+          </div>
+          <CommentSection fileID={usedFile.id} />
+        </div>
       ) : (
         <p>Loading Editor...</p>
       )}
-      <div className={styles.resizeBar}>
-        <img src="/grab.svg" alt="resize" draggable={false} />
-      </div>
-      <Console consoleResult={consoleResult} nbExecutions={nbExecutions} />
-    </div>
+    </>
   );
 };
 

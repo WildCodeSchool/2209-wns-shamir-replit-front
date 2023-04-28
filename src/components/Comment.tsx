@@ -1,164 +1,136 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
+import { commentAPI } from "../api/commentAPI";
 import "./Comment.scss";
+import {
+  IComment,
+  ICommentAnswer,
+  CreateComment,
+  CreateCommentAnswer,
+} from "../interfaces/IComment";
 
-// interface Comment {
-//   text: string;
-// }
-
-// const CommentSection = () => {
-//   const [comments, setComments] = useState<Comment[]>([]);
-//   const [newComment, setNewComment] = useState("");
-
-//   //const getAllComment = () => {};
-
-//   const handleSubmit = (e: React.FormEvent) => {
-//     e.preventDefault();
-//     setComments([...comments, { text: newComment }]);
-//     setNewComment("");
-//   };
-
-//   return (
-//     <div>
-//       <form onSubmit={handleSubmit}>
-//         <ul>
-//           {comments.map((comment, index) => (
-//             <li key={index}>{comment.text}</li>
-//           ))}
-//         </ul>
-//         <textarea
-//           value={newComment}
-//           onChange={(e) => setNewComment(e.target.value)}
-//         />
-//         <button type="submit">Ajouter un commentaire</button>
-//       </form>
-//     </div>
-//   );
-// };
-
-// export default CommentSection;
-
-interface Comment {
-  id: number;
-  text: string;
-  replies: Comment[];
-}
-
-const CommentSection: React.FC<{ comments: Comment[] }> = ({ comments }) => {
-  const [newReplyText, setNewReplyText] = useState("");
-  const [replyToCommentId, setReplyToCommentId] = useState<number | null>(null);
-  const [commentsState, setCommentsState] = useState(comments);
-
-<<<<<<< HEAD
-  const handleAddComment = (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    const newComment = {
-      id: Math.floor(Math.random() * 10000),
-      text: newReplyText,
-      replies: [],
-    };
-    const updatedComments = [...commentsState, newComment];
-    setNewReplyText("");
-    setCommentsState(updatedComments);
-  };
-=======
-  // const getAllComment = () => {};
->>>>>>> origin/dev
-
-  const handleAddReply = (commentId: number) => {
-    const newReply = {
-      id: Math.floor(Math.random() * 10000),
-      text: newReplyText,
-      replies: [],
-    };
-    const updatedComments = commentsState.map((comment) => {
-      if (comment.id === commentId) {
-        return {
-          ...comment,
-          replies: [...comment.replies, newReply],
-        };
-      } else {
-        return comment;
-      }
-    });
-    setNewReplyText("");
-    setReplyToCommentId(null);
-    setCommentsState(updatedComments);
-  };
-
-  return (
-    <div className="comment-section">
-      <h2>Comments</h2>
-      <form onSubmit={handleAddComment}>
-        <input
-          type="text"
-          placeholder="Write a comment"
-          value={newReplyText}
-          onChange={(e) => setNewReplyText(e.target.value)}
-        />
-        <button type="submit">Submit</button>
-      </form>
-      {commentsState.map((comment) => (
-        <div key={comment.id} className="comment">
-          <p>{comment.text}</p>
-          <button onClick={() => setReplyToCommentId(comment.id)}>Reply</button>
-          {replyToCommentId === comment.id && (
-            <form
-              onSubmit={() => handleAddReply(comment.id)}
-              className="reply-form"
-            >
-              <input
-                type="text"
-                placeholder="Write a reply"
-                value={newReplyText}
-                onChange={(e) => setNewReplyText(e.target.value)}
-              />
-              <button type="submit">Submit</button>
-            </form>
-          )}
-          {comment.replies.length > 0 && (
-            <div className="replies">
-              {comment.replies.map((reply) => (
-                <div key={reply.id} className="comment reply">
-                  <p>{reply.text}</p>
-                  <button onClick={() => setReplyToCommentId(comment.id)}>
-                    Reply
-                  </button>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-      ))}
-    </div>
-  );
+type CommentSectionProps = {
+  fileID: number;
 };
 
-const TestComment = () => {
-  const comments = [
-    {
-      id: 1,
-      text: "yo",
-      replies: [
-        {
-          id: 2,
-          text: "oy",
-          replies: [],
-        },
-      ],
-    },
-    {
-      id: 3,
-      text: "rr.",
-      replies: [],
-    },
-  ];
+const CommentSection = (props: CommentSectionProps) => {
+  const [newReplyText, setNewReplyText] = useState("");
+  const [replyToCommentId, setReplyToCommentId] = useState<number | null>(null);
+  const [commentsState, setCommentsState] = useState<IComment[]>([]);
+  const [commentsAnswerState, setCommentsAnswerState] = useState<
+    ICommentAnswer[]
+  >([]);
+
+  useEffect(() => {
+    getAllComment();
+  }, []);
+
+  const getAllComment = async () => {
+    const comments = await commentAPI.getAllComment(props.fileID);
+    const commentsAns: ICommentAnswer[] = [];
+    comments.forEach((comment) => {
+      comment.commentAnswer.forEach((element) => {
+        commentsAns.push({
+          answer_date: element.answer_date,
+          codeComment: element.codeComment,
+          id: element.id,
+          comment: element.comment,
+          userId: element.userId,
+        });
+      });
+    });
+    setCommentsState(comments);
+    setCommentsAnswerState(commentsAns);
+  };
+
+  const handleAddComment = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    const newComment: CreateComment = {
+      comment: newReplyText,
+      char_length: 5,
+      char_number: 5,
+      fileId: props.fileID,
+      is_report: false,
+      line_number: 5,
+      resolved: false,
+    };
+    const createdComment = await commentAPI.create(newComment);
+    const updatedComments: IComment[] = [...commentsState, createdComment];
+    setNewReplyText("");
+    setCommentsState(updatedComments);
+  };
+
+  const handleAddReply = async (commentId: number) => {
+    const newReply: CreateCommentAnswer = {
+      comment: newReplyText,
+      codeCommentId: commentId,
+    };
+    const createdAnswerComment = await commentAPI.createCommentAnswer(
+      newReply.comment,
+      newReply.codeCommentId
+    );
+    const updatedCommentsAnswer: ICommentAnswer[] = [
+      ...commentsAnswerState,
+      createdAnswerComment,
+    ];
+    setNewReplyText("");
+    setCommentsAnswerState(updatedCommentsAnswer);
+  };
 
   return (
     <div className="comment-container">
       <h1>Commentaires</h1>
-      <CommentSection comments={comments} />
+      {commentsState.length > 0 && (
+        <div className="comment-section">
+          <h2>Comments</h2>
+          <form onSubmit={handleAddComment}>
+            <input
+              type="text"
+              placeholder="Write a comment"
+              value={newReplyText}
+              onChange={(e) => setNewReplyText(e.target.value)}
+            />
+            <button type="submit">Submit</button>
+          </form>
+          {commentsState.map((comment) => (
+            <div key={comment.id} className="comment">
+              <p>{comment.comment}</p>
+              <button onClick={() => setReplyToCommentId(comment.id)}>
+                Reply
+              </button>
+              {replyToCommentId === comment.id && (
+                <form
+                  onSubmit={(e) => {
+                    e.preventDefault(), handleAddReply(comment.id);
+                  }}
+                  className="reply-form"
+                >
+                  <input
+                    type="text"
+                    placeholder="Write a reply"
+                    value={newReplyText}
+                    onChange={(e) => setNewReplyText(e.target.value)}
+                  />
+                  <button type="submit">Submit</button>
+                </form>
+              )}
+              {commentsAnswerState.length > 0 && (
+                <div className="replies">
+                  {commentsAnswerState.map((reply) => (
+                    <div key={reply.codeComment.id} className="comment reply">
+                      <p>@{reply.comment}</p>
+                      <button onClick={() => setReplyToCommentId(comment.id)}>
+                        Reply
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 };
 
-export default TestComment;
+export default CommentSection;
