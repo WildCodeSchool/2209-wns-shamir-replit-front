@@ -9,6 +9,7 @@ import { Socket } from "socket.io-client";
 import { IFiles, FilesCodeData } from "../interfaces/iFile";
 import { websocket } from "../api/websocket";
 import { Coworker } from "../api/coworkerAPI";
+import UserContext from "../contexts/userContext";
 
 const Edit = () => {
   const [consoleResult, setConsoleResult] = useState<
@@ -22,6 +23,7 @@ const Edit = () => {
   const [usedFile, setUsedFile] = useState<FilesCodeData>();
   const { project } = useContext(ProjectContext);
   const [editorCode, setEditorCode] = useState("");
+  const previousEditorCode = useRef<string>("");
   const [nbExecutions, setNbExecutions] = useState<number | undefined>(
     undefined
   );
@@ -29,6 +31,7 @@ const Edit = () => {
   const [coworkers, setCoworkers] = useState<Coworker[]>([]);
   const [restoreCursor, setRestoreCursor] = useState(false);
   const [lockCursor, setLockCursor] = useState(false);
+  const { user } = useContext(UserContext);
 
   const websockets = useRef<Socket[]>([]);
 
@@ -41,13 +44,16 @@ const Edit = () => {
   const websocketConnect = async () => {
     websocketDisconnect();
 
-    websockets.current.push(
-      await websocket.connect(
-        { project_id: parseInt(project.id || "0") },
-        setForceEditorUpdate,
-        setCoworkers
-      )
-    );
+    const userEmail = user.email;
+
+    if (userEmail)
+      websockets.current.push(
+        await websocket.connect(
+          { project_id: parseInt(project.id || "0"), userEmail },
+          setForceEditorUpdate,
+          setCoworkers
+        )
+      );
   };
 
   const updateFileCodeOnline = async (
@@ -57,7 +63,15 @@ const Edit = () => {
   ) => {
     if (usedFile) {
       try {
-        return await fileAPI.updateFileOnline(codeToPush, fileId, projectId);
+        const socketIds = websockets.current.map((ws) => ws.id);
+        previousEditorCode.current = codeToPush;
+
+        return await fileAPI.updateFileOnline(
+          codeToPush,
+          fileId,
+          projectId,
+          socketIds
+        );
       } catch (e) {
         return false;
       }
@@ -89,12 +103,18 @@ const Edit = () => {
     const projectId = project.id;
     if (projectId !== undefined) {
       const req = await fileAPI.getAllFilesByProjectId(projectId);
-      setProjectFiles(req.getFilesByProjectId);
-      setFilesCodeArr(req.getCodeFiles);
-      setUsedFile(req.getCodeFiles[0]);
-      setEditorCode(req.getCodeFiles[0].code);
-      setRestoreCursor(true);
-      // setLockCursor(false);
+
+      const newCode = req.getCodeFiles[0].code;
+
+      if (previousEditorCode.current !== newCode) {
+        setProjectFiles(req.getFilesByProjectId);
+        setFilesCodeArr(req.getCodeFiles);
+        setUsedFile(req.getCodeFiles[0]);
+        setEditorCode(newCode);
+        previousEditorCode.current = newCode;
+        setRestoreCursor(true);
+        // setLockCursor(false);
+      }
     }
   };
 
@@ -129,6 +149,7 @@ const Edit = () => {
           setRestoreCursor={setRestoreCursor}
           lockCursor={lockCursor}
           setLockCursor={setLockCursor}
+          forceEditorUpdate={forceEditorUpdate}
         />
       ) : (
         <p>Loading Editor...</p>

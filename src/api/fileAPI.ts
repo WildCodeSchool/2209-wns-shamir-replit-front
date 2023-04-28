@@ -33,7 +33,8 @@ export const fileAPI = {
   updateFileOnline: async (
     codeToPush: string,
     fileId: number,
-    projectId: number
+    projectId: number,
+    socketIds: string[]
   ) => {
     try {
       const { data } = await api.mutate({
@@ -42,6 +43,7 @@ export const fileAPI = {
           contentData: codeToPush,
           fileId: fileId,
           projectId: projectId,
+          socketIds: JSON.stringify(socketIds),
         },
       });
       return JSON.parse(data.updateCodeFile) as updateRes;
