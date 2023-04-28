@@ -9,6 +9,7 @@ if (process.env.REACT_APP_BACKEND_URL)
 
 type Query = {
   project_id: number;
+  userEmail: string;
 };
 
 export const websocket = {
@@ -27,10 +28,14 @@ export const websocket = {
         console.info("socket connected !", socket.id);
 
         socket.on("refresh editor", async (_arg) => {
+          console.log("refresh editor", _arg);
+
           setForceEditorUpdate(new Date().getTime());
         });
 
         socket.on("refresh cursor", async (_arg: Coworker[]) => {
+          console.log("refresh cursor");
+
           setCoworkers(_arg);
         });
 

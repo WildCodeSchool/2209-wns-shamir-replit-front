@@ -11,6 +11,7 @@ import { IFileData, IFileCodeData } from "../interfaces/iFile";
 import { websocket } from "../api/websocket";
 import { Coworker } from "../api/coworkerAPI";
 import CommentSection from "../components/Comment";
+import UserContext from "../contexts/userContext";
 
 const Edit = () => {
   const [consoleResult, setConsoleResult] = useState<
@@ -20,6 +21,7 @@ const Edit = () => {
   const [usedFile, setUsedFile] = useState<IFileCodeData>();
   const { project } = useContext(ProjectContext);
   const [editorCode, setEditorCode] = useState("");
+  const previousEditorCode = useRef<string>("");
   const [nbExecutions, setNbExecutions] = useState<number | undefined>(
     undefined
   );
@@ -27,7 +29,7 @@ const Edit = () => {
   const [coworkers, setCoworkers] = useState<Coworker[]>([]);
   const [restoreCursor, setRestoreCursor] = useState(false);
   const [lockCursor, setLockCursor] = useState(false);
-
+  const { user } = useContext(UserContext);
   const websockets = useRef<Socket[]>([]);
 
   const websocketDisconnect = () => {
@@ -39,28 +41,42 @@ const Edit = () => {
   const websocketConnect = async () => {
     websocketDisconnect();
 
-    // websockets.current.push(
-    //   await websocket.connect(project.id, setForceEditorUpdate, setCoworkers)
-    // );
+    const userEmail = user.email;
+
+    if (userEmail) {
+      const socket = await websocket.connect(
+        { project_id: project.id || 0, userEmail },
+        setForceEditorUpdate,
+        setCoworkers
+      );
+      websockets.current.push(socket);
+      return socket;
+    }
   };
-  async function updateFileCodeOnline(
+
+  const updateFileCodeOnline = async (
     codeToPush: string,
     fileId: number,
     projectId: number
-  ): Promise<boolean> {
-    if (!usedFile) {
-      return false;
+  ): Promise<boolean> => {
+    if (usedFile) {
+      try {
+        const socketIds = websockets.current.map((ws) => ws.id);
+        previousEditorCode.current = codeToPush;
+
+        await fileAPI.updateFileOnline(
+          codeToPush,
+          fileId,
+          projectId,
+          socketIds
+        );
+        return true;
+      } catch (e) {
+        return false;
+      }
     }
-    try {
-      await fileAPI.updateFileOnline(codeToPush, fileId, projectId);
-      return true;
-    } catch (error) {
-      console.error(
-        `Failed to update file with id ${fileId} in project ${projectId}. Error message: ${error}`
-      );
-      return false;
-    }
-  }
+    return false;
+  };
 
   const updateCode = async (value: string) => {
     setEditorCode(value);
@@ -82,7 +98,6 @@ const Edit = () => {
   const getFilesInformations = async () => {
     if (project.id !== undefined) {
       const req = await fileAPI.getAllFilesByProjectId(project.id);
-
       const newFileCodeData: IFileCodeData = {
         code: req.getCodeFiles[0].code,
         id: req.getFilesByProjectId[0].id,
@@ -91,10 +106,12 @@ const Edit = () => {
         projectId: req.getCodeFiles[0].projectId,
       };
 
-      setUsedFile(newFileCodeData);
-      setEditorCode(newFileCodeData.code);
-      setRestoreCursor(true);
-      // setLockCursor(false);
+      if (previousEditorCode.current !== newFileCodeData.code) {
+        setUsedFile(newFileCodeData);
+        setEditorCode(newFileCodeData.code);
+        previousEditorCode.current = newFileCodeData.code;
+        setRestoreCursor(true);
+      }
     }
   };
 
@@ -131,6 +148,7 @@ const Edit = () => {
               setRestoreCursor={setRestoreCursor}
               lockCursor={lockCursor}
               setLockCursor={setLockCursor}
+              forceEditorUpdate={forceEditorUpdate}
             />
             <div className={styles.resizeBar}>
               <img src="/grab.svg" alt="resize" draggable={false} />

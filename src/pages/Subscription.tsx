@@ -117,21 +117,30 @@ const Subscription = () => {
       if (paymentMethodResult) {
         const { error, paymentMethod } = paymentMethodResult;
         if (!error) {
-          const { id } = paymentMethod;
-          const { data } = await stripeAPI.getStripe(
-            selectedRenewal === "monthly" ? 5 : 48,
-            id
-          );
+          try {
+            const { id } = paymentMethod;
+            const { data } = await stripeAPI.getStripe(
+              selectedRenewal === "monthly" ? 5 : 48,
+              id
+            );
 
-          if (data?.success) {
-            setPaymentSuccess(true);
-            const { date_start_subscription, date_end_subscription } = data;
-            setUser({
-              ...user,
-              date_start_subscription: new Date(date_start_subscription),
-              date_end_subscription: new Date(date_end_subscription),
-            });
+            if (data?.success) {
+              setPaymentSuccess(true);
+
+              const { date_start_subscription, date_end_subscription } = data;
+
+              setUser({
+                ...user,
+                date_start_subscription: new Date(date_start_subscription),
+                date_end_subscription: new Date(date_end_subscription),
+              });
+            }
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          } catch (err: any) {
+            console.error(err);
           }
+        } else {
+          console.error("error", error.message);
         }
       }
     }
