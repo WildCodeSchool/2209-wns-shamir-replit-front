@@ -56,3 +56,93 @@
   align-items: center;
   cursor: pointer;
 }
+
+.coWorkerCursor {
+  position: relative;
+}
+
+@keyframes blink {
+  0% {
+    filter: saturate(0.5);
+  }
+  100% {
+    filter: saturate(1);
+  }
+}
+
+.coWorkerCursor:after {
+  animation: blink 1s ease-in-out both infinite;
+  content: "";
+  position: absolute;
+  top: 0px;
+  left: -1px;
+  height: 100%;
+  width: 4px;
+}
+
+.coWorkerCursor:before {
+  z-index: 999;
+  animation: blink 1s ease-in-out both infinite;
+  padding: 2px 0px 0px 0px;
+  text-align: center;
+  font-size: 14px;
+  position: absolute;
+  top: -18px;
+  left: -10px;
+  height: 20px;
+  width: 22px;
+  border-radius: 50%;
+}
+
+.coWorkerCursor0:before {
+  content: "🐵";
+}
+.coWorkerCursor1:before {
+  content: "🦊";
+}
+.coWorkerCursor2:before {
+  content: "🐮";
+}
+.coWorkerCursor3:before {
+  content: "🐱";
+}
+.coWorkerCursor4:before {
+  content: "🦁";
+}
+.coWorkerCursor5:before {
+  content: "🐺";
+}
+
+.coWorkerCursor0:after,
+.coWorkerCursor0:before {
+  background-color: lightsalmon;
+}
+.coWorkerCursor1:after,
+.coWorkerCursor1:before {
+  background-color: lightblue;
+}
+.coWorkerCursor2:after,
+.coWorkerCursor2:before {
+  background-color: lightgreen;
+}
+.coWorkerCursor3:after,
+.coWorkerCursor3:before {
+  background-color: yellow;
+}
+.coWorkerCursor4:after,
+.coWorkerCursor4:before {
+  background-color: cyan;
+}
+.coWorkerCursor5:after,
+.coWorkerCursor5:before {
+  background-color: lightcoral;
+}
+
+.coWorkerName {
+  display: block;
+  position: absolute;
+  z-index: 999;
+  top: 19px;
+  background-color: green;
+  padding: 2px 5px;
+}

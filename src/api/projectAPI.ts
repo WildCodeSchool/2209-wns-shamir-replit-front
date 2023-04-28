@@ -161,6 +161,23 @@ export const projectAPI = {
     }
   },
 
+  deleteProject: async (projectId: string): Promise<IProject> => {
+    const project = (
+      await api.mutate({
+        mutation: gql`
+          mutation Mutation($projectId: Float!) {
+            deleteProject(projectId: $projectId) {
+              id
+            }
+          }
+        `,
+        variables: { projectId },
+      })
+    ).data.deleteProject as IProject;
+
+    return { ...project, id: project.id.toString() };
+  },
+
   getPublic: async (): Promise<IProject[]> => {
     try {
       const projects = (

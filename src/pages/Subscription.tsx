@@ -57,12 +57,6 @@ const Subscription = () => {
 
     const { date_start_subscription, date_end_subscription } = user;
 
-    console.log(
-      "date_start_subscription, date_end_subscription",
-      typeof date_start_subscription,
-      typeof date_end_subscription
-    );
-
     let newIsSubscribedBase = false;
 
     if (
@@ -108,8 +102,6 @@ const Subscription = () => {
   const showSubscriptionDiv = () => !isSubscribedBase && selectedPlan === "pro";
 
   const handleCheckout = async () => {
-    console.log("handleCheckout", elements, stripe);
-
     if (elements === null || stripe === null) {
       return;
     }
@@ -133,7 +125,6 @@ const Subscription = () => {
             );
 
             if (data?.success) {
-              console.log("alright");
               setPaymentSuccess(true);
 
               const { date_start_subscription, date_end_subscription } = data;
@@ -146,10 +137,10 @@ const Subscription = () => {
             }
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
           } catch (err: any) {
-            console.log(err);
+            console.error(err);
           }
         } else {
-          console.log("error", error.message);
+          console.error("error", error.message);
         }
       }
     }

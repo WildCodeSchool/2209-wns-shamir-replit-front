@@ -1,11 +1,15 @@
-import React, { useContext, useEffect, useState } from "react";
+import React, { useContext, useEffect, useRef, useState } from "react";
 import Editor from "../components/Editor";
 import Console from "../components/Console";
 import { executeCodeAPI, ExecutedCode } from "../api/executeCodeAPI";
 import styles from "./Edit.module.scss";
 import ProjectContext from "../contexts/projectContext";
 import { fileAPI } from "../api/fileAPI";
+import { Socket } from "socket.io-client";
 import { IFiles, FilesCodeData } from "../interfaces/iFile";
+import { websocket } from "../api/websocket";
+import { Coworker } from "../api/coworkerAPI";
+import UserContext from "../contexts/userContext";
 
 const Edit = () => {
   const [consoleResult, setConsoleResult] = useState<
@@ -19,9 +23,38 @@ const Edit = () => {
   const [usedFile, setUsedFile] = useState<FilesCodeData>();
   const { project } = useContext(ProjectContext);
   const [editorCode, setEditorCode] = useState("");
+  const previousEditorCode = useRef<string>("");
   const [nbExecutions, setNbExecutions] = useState<number | undefined>(
     undefined
   );
+  const [forceEditorUpdate, setForceEditorUpdate] = useState(0);
+  const [coworkers, setCoworkers] = useState<Coworker[]>([]);
+  const [restoreCursor, setRestoreCursor] = useState(false);
+  const [lockCursor, setLockCursor] = useState(false);
+  const { user } = useContext(UserContext);
+
+  const websockets = useRef<Socket[]>([]);
+
+  const websocketDisconnect = () => {
+    websockets.current.map((socket) => {
+      socket.close();
+    });
+  };
+
+  const websocketConnect = async () => {
+    websocketDisconnect();
+
+    const userEmail = user.email;
+
+    if (userEmail)
+      websockets.current.push(
+        await websocket.connect(
+          { project_id: parseInt(project.id || "0"), userEmail },
+          setForceEditorUpdate,
+          setCoworkers
+        )
+      );
+  };
 
   const updateFileCodeOnline = async (
     codeToPush: string,
@@ -30,7 +63,15 @@ const Edit = () => {
   ) => {
     if (usedFile) {
       try {
-        return await fileAPI.updateFileOnline(codeToPush, fileId, projectId);
+        const socketIds = websockets.current.map((ws) => ws.id);
+        previousEditorCode.current = codeToPush;
+
+        return await fileAPI.updateFileOnline(
+          codeToPush,
+          fileId,
+          projectId,
+          socketIds
+        );
       } catch (e) {
         return false;
       }
@@ -62,15 +103,34 @@ const Edit = () => {
     const projectId = project.id;
     if (projectId !== undefined) {
       const req = await fileAPI.getAllFilesByProjectId(projectId);
-      setProjectFiles(req.getFilesByProjectId);
-      setFilesCodeArr(req.getCodeFiles);
-      setUsedFile(req.getCodeFiles[0]);
-      setEditorCode(req.getCodeFiles[0].code);
+
+      const newCode = req.getCodeFiles[0].code;
+
+      if (previousEditorCode.current !== newCode) {
+        setProjectFiles(req.getFilesByProjectId);
+        setFilesCodeArr(req.getCodeFiles);
+        setUsedFile(req.getCodeFiles[0]);
+        setEditorCode(newCode);
+        previousEditorCode.current = newCode;
+        setRestoreCursor(true);
+        // setLockCursor(false);
+      }
     }
   };
 
   useEffect(() => {
+    setLockCursor(true);
     getFilesInformations();
+  }, [forceEditorUpdate]);
+
+  useEffect(() => {
+    setLockCursor(false);
+  }, [editorCode]);
+
+  useEffect(() => {
+    getFilesInformations();
+    websocketConnect();
+    return () => websocketDisconnect();
   }, [project]);
 
   return (
@@ -78,11 +138,18 @@ const Edit = () => {
       {usedFile ? (
         <Editor
           sendMonaco={sendMonaco}
+          coworkers={coworkers}
           editorCode={editorCode}
           updateCode={updateCode}
           updateFileCodeOnline={updateFileCodeOnline}
           fileId={usedFile.id}
           projectId={usedFile?.projectId}
+          websockets={websockets}
+          restoreCursor={restoreCursor}
+          setRestoreCursor={setRestoreCursor}
+          lockCursor={lockCursor}
+          setLockCursor={setLockCursor}
+          forceEditorUpdate={forceEditorUpdate}
         />
       ) : (
         <p>Loading Editor...</p>

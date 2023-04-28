@@ -5,6 +5,9 @@ import * as monaco from "monaco-editor/esm/vs/editor/editor.api";
 import { updateRes } from "../api/fileAPI";
 import { projectAPI } from "../api/projectAPI";
 import ProjectContext from "../contexts/projectContext";
+import { Coworker } from "../api/coworkerAPI";
+import { Socket } from "socket.io-client";
+import useCollaborativeEdition from "../hooks/useCollaborativeEdition";
 
 type EditeurProps = {
   sendMonaco: (code: string) => Promise<void>;
@@ -17,6 +20,13 @@ type EditeurProps = {
   ) => Promise<false | updateRes | undefined>;
   fileId: number;
   projectId: number;
+  coworkers: Coworker[];
+  websockets: React.MutableRefObject<Socket[]>;
+  restoreCursor: boolean;
+  setRestoreCursor: React.Dispatch<React.SetStateAction<boolean>>;
+  lockCursor: boolean;
+  setLockCursor: React.Dispatch<React.SetStateAction<boolean>>;
+  forceEditorUpdate: number;
 };
 
 type DownloadFile = {
@@ -29,17 +39,38 @@ type Theme = "light" | "vs-dark";
 const Editeur = (props: EditeurProps) => {
   const [theme, setTheme] = useState<Theme>("light");
   const { project } = useContext(ProjectContext);
+  const isTyping = useRef<boolean>(false);
+  const editorRef = useRef<monaco.editor.IStandaloneCodeEditor | null>(null);
+
+  const { setCursorPosition, sendCursorPosition, updateCoworkers } =
+    useCollaborativeEdition({
+      coworkers: props.coworkers,
+      editorRef,
+      setRestoreCursor: props.setRestoreCursor,
+      lockCursor: props.lockCursor,
+      setLockCursor: props.setLockCursor,
+      isTyping,
+      editorCode: props.editorCode,
+      websockets: props.websockets,
+      projectId: props.projectId,
+    });
 
   // State Booléen pour savoir si le document est sauvegarder en ligne
   const [isSaveOnline, setIsSaveOnline] = useState(true);
 
   // const editor = document.getElementById("resize");
   // const [input, setInput] = useState<string>();
-  const editorRef = useRef<monaco.editor.IStandaloneCodeEditor | null>(null);
 
   const getMonacoText = () => {
+    const now = new Date().getTime();
+
+    if (now - props.forceEditorUpdate < 500) return;
+
+    isTyping.current = true;
     setIsSaveOnline(false);
-    if (editorRef.current) props.updateCode(editorRef.current.getValue());
+    if (editorRef.current) {
+      props.updateCode(editorRef.current.getValue());
+    }
   };
 
   const monacoHook = useMonaco();
@@ -70,7 +101,6 @@ const Editeur = (props: EditeurProps) => {
     const res = (await projectAPI.downloadProject(
       props.projectId
     )) as DownloadFile;
-    console.log(res);
     const href = URL.createObjectURL(res.data);
 
     // create "a" HTML element with href to file & click
@@ -87,16 +117,30 @@ const Editeur = (props: EditeurProps) => {
   };
 
   useEffect(() => {
+    updateCoworkers();
+  }, [props.coworkers, props.lockCursor]);
+
+  useEffect(() => {
+    if (props.restoreCursor) {
+      // retrieve previous cursorPosition
+      setCursorPosition();
+    }
+  }, [props.restoreCursor, props.lockCursor]);
+
+  useEffect(() => {
     // do conditional chaining
     monacoHook?.languages.typescript.javascriptDefaults.setEagerModelSync(true);
     const willUpdate = setTimeout(async () => {
+      isTyping.current = false;
       const res = await props.updateFileCodeOnline(
         props.editorCode,
         props.fileId,
         props.projectId
       );
-      if (res !== false && res !== undefined) setIsSaveOnline(true);
-    }, 2000);
+      if (res !== false && res !== undefined) {
+        setIsSaveOnline(true);
+      }
+    }, 500);
     return () => clearTimeout(willUpdate);
   }, [monacoHook, props.editorCode]);
 
@@ -120,7 +164,12 @@ const Editeur = (props: EditeurProps) => {
         </div>
       </div>
 
-      <div className={styles.resizable} id="resize">
+      <div
+        className={styles.resizable}
+        id="resize"
+        onKeyUp={sendCursorPosition}
+        onClick={sendCursorPosition}
+      >
         {props.fileId ? (
           <Editor
             height="50vh"
@@ -128,7 +177,8 @@ const Editeur = (props: EditeurProps) => {
             theme={theme}
             onMount={handleEditorDidMount}
             onChange={getMonacoText}
-            defaultValue={props.editorCode}
+            // defaultValue={props.editorCode}
+            value={props.editorCode}
           />
         ) : (
           <p>Test</p>
