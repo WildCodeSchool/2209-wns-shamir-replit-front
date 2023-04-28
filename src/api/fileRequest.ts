@@ -23,12 +23,14 @@ const fileRequest = {
       $fileId: Float!
       $projectId: Float!
       $contentData: String!
+      $updatedLines: String!
     ) {
       updateCodeFile(
         socketIds: $socketIds
         fileId: $fileId
         projectId: $projectId
         contentData: $contentData
+        updatedLines: $updatedLines
       )
     }
   `,
