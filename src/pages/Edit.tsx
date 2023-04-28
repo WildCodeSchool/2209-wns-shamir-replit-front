@@ -60,11 +60,18 @@ const Edit = () => {
     const splittedOldCode = oldCode.split("\n");
     const splittedNewCode = newCode.split("\n");
 
-    return splittedOldCode
-      .map((oldLine, lineIndex) =>
-        oldLine !== splittedNewCode[lineIndex] ? lineIndex : undefined
-      )
-      .filter((lineIndex) => lineIndex !== undefined) as number[];
+    const updatedLines =
+      splittedOldCode.length !== splittedNewCode.length
+        ? Array(splittedNewCode.length)
+            .fill(undefined)
+            .map((_, index) => index)
+        : (splittedOldCode
+            .map((oldLine, lineIndex) =>
+              oldLine !== splittedNewCode[lineIndex] ? lineIndex : undefined
+            )
+            .filter((lineIndex) => lineIndex !== undefined) as number[]);
+
+    return updatedLines;
   };
 
   const updateFileCodeOnline = async (
