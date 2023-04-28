@@ -34,7 +34,8 @@ export const fileAPI = {
     codeToPush: string,
     fileId: number,
     projectId: number,
-    socketIds: string[]
+    socketIds: string[],
+    updatedLines: number[]
   ) => {
     try {
       const { data } = await api.mutate({
@@ -44,6 +45,7 @@ export const fileAPI = {
           fileId: fileId,
           projectId: projectId,
           socketIds: JSON.stringify(socketIds),
+          updatedLines: JSON.stringify(updatedLines),
         },
       });
       return JSON.parse(data.updateCodeFile) as updateRes;

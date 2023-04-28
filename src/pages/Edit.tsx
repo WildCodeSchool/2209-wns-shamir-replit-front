@@ -56,6 +56,17 @@ const Edit = () => {
       );
   };
 
+  const compareCodeLines = (oldCode: string, newCode: string) => {
+    const splittedOldCode = oldCode.split("\n");
+    const splittedNewCode = newCode.split("\n");
+
+    return splittedOldCode
+      .map((oldLine, lineIndex) =>
+        oldLine !== splittedNewCode[lineIndex] ? lineIndex : undefined
+      )
+      .filter((lineIndex) => lineIndex !== undefined) as number[];
+  };
+
   const updateFileCodeOnline = async (
     codeToPush: string,
     fileId: number,
@@ -64,14 +75,21 @@ const Edit = () => {
     if (usedFile) {
       try {
         const socketIds = websockets.current.map((ws) => ws.id);
-        previousEditorCode.current = codeToPush;
 
-        return await fileAPI.updateFileOnline(
+        const updatedLines = compareCodeLines(
+          previousEditorCode.current,
+          codeToPush
+        );
+
+        const updateRes = await fileAPI.updateFileOnline(
           codeToPush,
           fileId,
           projectId,
-          socketIds
+          socketIds,
+          updatedLines
         );
+        previousEditorCode.current = codeToPush;
+        return updateRes;
       } catch (e) {
         return false;
       }
