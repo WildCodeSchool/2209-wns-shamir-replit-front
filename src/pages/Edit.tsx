@@ -78,6 +78,14 @@ const Edit = () => {
           previousEditorCode.current,
           codeToPush
         );
+        if (updatedLines.length > 0) return false;
+
+        console.log(
+          "line",
+          previousEditorCode.current,
+          codeToPush,
+          updatedLines
+        );
 
         await fileAPI.updateFileOnline(
           codeToPush,
@@ -114,7 +122,11 @@ const Edit = () => {
 
   const getFilesInformations = async () => {
     if (project.id !== undefined) {
+      console.log(project.id);
+
       const req = await fileAPI.getAllFilesByProjectId(project.id);
+      console.log(req);
+
       const newFileCodeData: IFileCodeData = {
         code: req.getCodeFiles[0].code,
         id: req.getFilesByProjectId[0].id,

@@ -43,14 +43,22 @@ const Home = () => {
   };
 
   const token = localStorage.getItem("token");
-
   const handleArrowClick = (
     list: "myProjects" | "sharedProjects" | "allProjects"
   ) => {
-    if (list === "myProjects") setShowMyProjectList(!showMyProjectList);
-    if (list === "sharedProjects")
-      setShowSharedProjectList(!showSharedProjectList);
-    if (list === "allProjects") setShowAllProjectList(!showAllProjectList);
+    switch (list) {
+      case "myProjects":
+        setShowMyProjectList((x) => !x);
+        break;
+      case "sharedProjects":
+        setShowSharedProjectList((x) => !x);
+        break;
+      case "allProjects":
+        setShowAllProjectList((x) => !x);
+        break;
+      default:
+        break;
+    }
   };
 
   const handleSearch = (
@@ -72,11 +80,10 @@ const Home = () => {
 
   const getPublicProjects = async () => {
     const projects = await projectAPI.getPublic();
-
     setPublicProjects(projects);
   };
 
-  const createNewProject = async (project: Omit<CreateProject, "userId">) => {
+  const createNewProject = async (project: CreateProject) => {
     setShowNewProjectModal(false);
     await projectAPI.create(project);
     await getEveryProjects();
@@ -94,9 +101,9 @@ const Home = () => {
 
     const description = project.description.toLowerCase();
     const name = project.name.toLowerCase();
-    const rawLogin = project.userId?.login;
+    const rawLogin = project.user?.login;
     let login: string | undefined = undefined;
-    if (rawLogin) login = project.userId?.login.toLowerCase();
+    if (rawLogin) login = project.user?.login.toLowerCase();
 
     return (
       login?.includes(searchValue) ||
@@ -113,7 +120,7 @@ const Home = () => {
             .map((pro) => [
               pro.name,
               ...pro.description.split(" "),
-              pro.userId?.login,
+              pro.user?.login,
             ])
             .flat()
             .filter((word) => word && word.length > 2)
@@ -133,7 +140,15 @@ const Home = () => {
 
   useEffect(() => {
     setForceProjectListUpdate(true);
-    setProject({});
+    setProject({
+      id: 0,
+      id_storage_number: "",
+      name: "",
+      description: "",
+      isPublic: false,
+      nb_views: 0,
+      file: [],
+    });
   }, []);
 
   useEffect(() => {
@@ -170,7 +185,7 @@ const Home = () => {
             alt="triangle"
             className={[
               styles.arrowDown,
-              showMyProjectList ? null : styles.arrowLeft,
+              showMyProjectList ?? styles.arrowLeft,
             ].join(" ")}
           />
           <span>My Projects</span>
@@ -251,7 +266,7 @@ const Home = () => {
           <div className={styles.projectsContainer}>
             {publicProjects
               ?.filter(filterBySearch)
-              .filter((project) => project.userId?.id !== user.id)
+              .filter((project) => project.user?.id !== user.id)
               .map((project) => (
                 <ProjectItem
                   key={project.id}
@@ -264,7 +279,7 @@ const Home = () => {
         )}
       </section>
 
-      {showNewProjectModal === true && (
+      {showNewProjectModal && (
         <NewProjectModal
           createNewProject={createNewProject}
           closeNewProjectModal={closeNewProjectModal}

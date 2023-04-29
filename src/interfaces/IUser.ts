@@ -1,5 +1,5 @@
 export type IUser<T = Date> = {
-  id: string;
+  id: number;
   email: string;
   login: string;
   date_start_subscription?: T | null;

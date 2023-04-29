@@ -5,7 +5,7 @@ export type IFileData = {
   id_storage_file: string;
   name: string;
   language: string;
-  userId?: IUser;
+  user: IUser;
   projectId?: number;
 };
 

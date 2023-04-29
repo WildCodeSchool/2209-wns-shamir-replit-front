@@ -9,7 +9,7 @@ import React, { BaseSyntheticEvent, useState } from "react";
 import { CreateProject } from "../interfaces/IProject";
 
 type NewProjectModalProps = {
-  createNewProject: (project: Omit<CreateProject, "userId">) => Promise<void>;
+  createNewProject: (project: CreateProject) => Promise<void>;
   closeNewProjectModal: () => void;
 };
 

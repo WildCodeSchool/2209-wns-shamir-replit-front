@@ -22,13 +22,13 @@ const CommentSection = (props: CommentSectionProps) => {
 
   useEffect(() => {
     getAllComment();
-  }, []);
+  }, [commentsState]);
 
   const getAllComment = async () => {
     const comments = await commentAPI.getAllComment(props.fileID);
     const commentsAns: ICommentAnswer[] = [];
     comments.forEach((comment) => {
-      comment.commentAnswer.forEach((element) => {
+      comment.commentAnswer?.forEach((element) => {
         commentsAns.push({
           answer_date: element.answer_date,
           codeComment: element.codeComment,
@@ -46,13 +46,15 @@ const CommentSection = (props: CommentSectionProps) => {
     event.preventDefault();
     const newComment: CreateComment = {
       comment: newReplyText,
-      char_length: 5,
-      char_number: 5,
+      char_length: null,
+      char_number: null,
       fileId: props.fileID,
-      is_report: false,
-      line_number: 5,
-      resolved: false,
+      is_report: null,
+      line_number: null,
+      resolved: null,
     };
+    console.log("here", newComment);
+
     const createdComment = await commentAPI.create(newComment);
     const updatedComments: IComment[] = [...commentsState, createdComment];
     setNewReplyText("");
@@ -113,9 +115,9 @@ const CommentSection = (props: CommentSectionProps) => {
                   <button type="submit">Submit</button>
                 </form>
               )}
-              {commentsAnswerState.length > 0 && (
+              {comment.commentAnswer.length > 0 && (
                 <div className="replies">
-                  {commentsAnswerState.map((reply) => (
+                  {comment.commentAnswer?.map((reply) => (
                     <div key={reply.codeComment.id} className="comment reply">
                       <p>@{reply.comment}</p>
                       <button onClick={() => setReplyToCommentId(comment.id)}>

@@ -18,7 +18,7 @@ import modalStyles from "../styles/modal.module.scss";
 import { userAPI } from "../api/userAPI";
 import { IUser } from "../interfaces/IUser";
 import { projectShareAPI } from "../api/projectShareAPI";
-import { IProject, IProjectShare } from "../interfaces/IProject";
+import { CreateProject, IProjectShare } from "../interfaces/IProject";
 import UserContext from "../contexts/userContext";
 import { projectAPI } from "../api/projectAPI";
 import VisibilityIcon from "@mui/icons-material/Visibility";
@@ -78,7 +78,7 @@ const ShareModal = ({ closeShareModal }: ShareModalProps) => {
 
         const id = await projectShareAPI.create({
           projectId: projectId,
-          userId: parseInt(userId, 10),
+          userId: userId,
           comment: false,
           write: false,
           read: false,
@@ -89,8 +89,8 @@ const ShareModal = ({ closeShareModal }: ShareModalProps) => {
           ...(projectProjectShare !== undefined ? projectProjectShare : []),
           {
             id,
-            userId: {
-              id: parseInt(userId, 10),
+            user: {
+              id: userId,
               login,
               email,
             },
@@ -108,8 +108,10 @@ const ShareModal = ({ closeShareModal }: ShareModalProps) => {
   };
 
   const togglePublic = async () => {
-    const updatedProject: Partial<IProject> = {
+    const updatedProject: CreateProject = {
       isPublic: !project.isPublic,
+      description: project.description,
+      name: project.name,
     };
     const projectId = project.id;
     if (projectId !== undefined) {
@@ -121,10 +123,10 @@ const ShareModal = ({ closeShareModal }: ShareModalProps) => {
   const getUserList = () => {
     const projectProjectShare = project.projectShare;
 
-    let alreadySharedWithIds: string[] = [];
+    let alreadySharedWithIds: number[] = [];
     if (projectProjectShare)
-      alreadySharedWithIds = projectProjectShare.map((pshare) =>
-        pshare.userId.id.toString()
+      alreadySharedWithIds = projectProjectShare.map(
+        (pshare) => pshare.user.id
       );
 
     return userList
@@ -170,7 +172,7 @@ const ShareModal = ({ closeShareModal }: ShareModalProps) => {
               </tr>
               {project.projectShare?.map((share) => (
                 <tr key={share.id}>
-                  <td>{share.userId.login}</td>
+                  <td>{share.user.login}</td>
                   <td>
                     <ToggleButtonGroup
                       value={(

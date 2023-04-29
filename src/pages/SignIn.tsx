@@ -10,7 +10,7 @@ import { userAPI } from "../api/userAPI";
 import { authAPI } from "../api/authAPI";
 import UserContext from "../contexts/userContext";
 import RegisterModal from "../components/RegisterModal";
-import { CreateUser } from "../interfaces/IUser";
+import { CreateUser, IUser } from "../interfaces/IUser";
 import { api } from "../api/_graphQL";
 import IconButton from "@mui/material/IconButton";
 import CloseIcon from "@mui/icons-material/Close";
@@ -27,6 +27,7 @@ const SignIn = () => {
 
   const handleLogin = async () => {
     const { status, data } = await authAPI.getToken(email, password);
+    console.log(status, data, email, password);
 
     if (status !== 200 || data === undefined) {
       setOpenToast(true);
@@ -38,16 +39,15 @@ const SignIn = () => {
     localStorage.setItem("userId", userId.toString());
     localStorage.setItem("token", token);
 
-    const user = (await userAPI.getAll()).filter(
-      (u) => u.id === userId.toString()
+    const user: IUser = (await userAPI.getAll()).filter(
+      (u) => u.id === userId
     )[0];
+    console.log(user);
 
-    setUser({ ...user, id: userId.toString() });
+    setUser({ ...user, id: userId });
     await api.resetStore();
-    // eslint-disable-next-line no-restricted-globals
-    location.reload();
-
-    navigate("/");
+    // // eslint-disable-next-line no-restricted-globals
+    // location.reload();
   };
 
   const registerNewUser = async (

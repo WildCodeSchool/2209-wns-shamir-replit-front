@@ -2,28 +2,24 @@ import { IProject } from "../interfaces/IProject";
 import { IUser } from "../interfaces/IUser";
 
 export const isLiked = (
-  project: IProject,
+  project: Partial<IProject>,
   user: Partial<IUser>,
   target: "src" | "alt"
 ) => {
   // Récupérer le tableau des "likes" pour le projet donné
   const projectLikes = project.like;
   // Récupérer l'ID de l'utilisateur
-  const userId = user.id;
 
   // Initialiser la variable de réponse à false
   let isLiked = false;
 
   // Vérifier si le projet a été aimé par l'utilisateur
-  if (projectLikes?.length && userId !== undefined) {
-    isLiked = projectLikes.some(
-      (like) => like.userId.id === parseInt(userId, 10)
-    );
+  if (projectLikes?.length && user.id !== undefined) {
+    isLiked = projectLikes.some((like) => like.user.id === user.id);
   }
 
-  return target === "src"
-    ? isLiked || "/heart-empty.svg"
-    : isLiked || "heart-empty";
+  if (target === "src") return isLiked ? "/heart-full.svg" : "/heart-empty.svg";
+  if (target === "alt") return isLiked ? "heart-full" : "heart-empty";
 };
 
 // export const isLiked = (

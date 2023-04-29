@@ -4,52 +4,49 @@ import { gql } from "@apollo/client";
 import { api as apiREST } from "./_REST";
 
 export const projectAPI = {
-  create: async (project: Omit<CreateProject, "userId">): Promise<IProject> => {
+  create: async (project: CreateProject): Promise<IProject> => {
     const newProject = (
       await api.mutate({
         // mutation à refaire lorsque le back sera OP
         mutation: gql`
-          mutation CreateProject(
-            $isPublic: Boolean!
-            $description: String!
-            $name: String!
-          ) {
-            createProject(
-              isPublic: $isPublic
-              description: $description
-              name: $name
-            ) {
+          mutation CreateProject($data: IProject!) {
+            createProject(data: $data) {
               description
+              id
+              id_storage_number
+              isPublic
               like {
                 id
-                userId {
+                user {
                   id
                   login
                 }
               }
+              name
+              nb_views
               projectShare {
-                userId {
+                comment
+                id
+                read
+                write
+                user {
                   login
                   email
                   id
                 }
-                id
-                comment
-                read
-                write
               }
-              id
-              id_storage_number
-              isPublic
-              name
-              nb_views
             }
           }
         `,
         variables: {
-          isPublic: project.isPublic,
-          description: project.description,
-          name: project.name,
+          data: {
+            isPublic: project.isPublic,
+            name: project.name,
+            description: project.description,
+          },
+          // isPublic: project.isPublic,
+          // description: project.description,
+          // name: project.name,
         },
       })
     ).data.createProject as IProject;
@@ -119,12 +116,12 @@ export const projectAPI = {
                 description
                 like {
                   id
-                  userId {
+                  user {
                     id
                   }
                 }
                 projectShare {
-                  userId {
+                  user {
                     login
                     email
                     id
@@ -139,7 +136,7 @@ export const projectAPI = {
                 isPublic
                 name
                 nb_views
-                userId {
+                user {
                   id
                   login
                 }
@@ -186,31 +183,34 @@ export const projectAPI = {
             query Query {
               getPublicProjects {
                 id
-                name
                 description
-                id_storage_number
-                isPublic
-                nb_views
-                like {
-                  id
-                  userId {
-                    id
-                  }
-                }
-                projectShare {
-                  userId {
-                    login
-                    email
-                    id
-                  }
-                  id
-                  read
-                  comment
-                  write
-                }
-                userId {
+                user {
                   id
                   login
+                }
+                projectShare {
+                  id
+                  user {
+                    id
+                    login
+                    email
+                  }
+                  comment
+                  read
+                  write
+                }
+                nb_views
+                name
+                like {
+                  id
+                  user {
+                    id
+                  }
+                }
+                isPublic
+                id_storage_number
+                fileCode {
+                  id
                 }
               }
             }
@@ -218,12 +218,7 @@ export const projectAPI = {
         })
       ).data.getPublicProjects as IProject[];
 
-      return (
-        projects?.map((projects) => ({
-          ...projects,
-          id: projects.id,
-        })) || []
-      );
+      return projects;
     } catch (e) {
       console.error(e);
       return [];
@@ -252,10 +247,7 @@ export const projectAPI = {
     return updatedProject[0]?.nb_views;
   },
 
-  addLike: async (rawProjectId: number | string): Promise<number> => {
-    const projectId =
-      typeof rawProjectId === "string" ? parseInt(rawProjectId) : rawProjectId;
-
+  addLike: async (projectId: number): Promise<number> => {
     const updatedProject = (
       await api.mutate({
         mutation: gql`
@@ -264,13 +256,13 @@ export const projectAPI = {
               description
               like {
                 id
-                userId {
+                user {
                   id
                   login
                 }
               }
               projectShare {
-                userId {
+                user {
                   login
                   email
                   id
@@ -297,10 +289,7 @@ export const projectAPI = {
     return updatedProject[0]?.like?.length || 0;
   },
 
-  removeLike: async (rawProjectId: number | string): Promise<number> => {
-    const projectId =
-      typeof rawProjectId === "string" ? parseInt(rawProjectId) : rawProjectId;
-
+  removeLike: async (projectId: number): Promise<number> => {
     const updatedProject = (
       await api.mutate({
         mutation: gql`
@@ -312,13 +301,13 @@ export const projectAPI = {
               isPublic
               like {
                 id
-                userId {
+                user {
                   id
                   login
                 }
               }
               projectShare {
-                userId {
+                user {
                   login
                   email
                   id
@@ -344,7 +333,7 @@ export const projectAPI = {
 
   update: async (
     rawProjectId: number | string,
-    project: Partial<IProject>
+    project: CreateProject
   ): Promise<number> => {
     const projectId =
       typeof rawProjectId === "string" ? parseInt(rawProjectId) : rawProjectId;

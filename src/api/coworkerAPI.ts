@@ -1,3 +1,4 @@
+import { IUser } from "../interfaces/IUser";
 import { api } from "./_REST";
 
 type CoworkerProps = {
@@ -8,7 +9,7 @@ type CoworkerProps = {
 export type Coworker = {
   name: string;
   project_id: number;
-  userId: number;
+  user: IUser;
   startLineNumber: number;
   startColumn: number;
   endLineNumber: number;

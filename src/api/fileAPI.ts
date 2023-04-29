@@ -15,27 +15,30 @@ type ResGetFilesAndCode = {
 
 export const fileAPI = {
   getAllFilesByProjectId: async (projectId: number): Promise<any> => {
-    const allProjectFiles = (
-      await api.query({
-        query: gql`
-          query GetFilesByProjectId($projectId: Float!) {
-            getFilesByProjectId(projectId: $projectId) {
-              id
-              name
-              id_storage_file
-              language
-            }
-            getCodeFiles(projectId: $projectId) {
-              code
-              language
-              name
-              projectId
-            }
+    const { data } = await api.query({
+      query: gql`
+        query GetFilesByProjectId($projectId: Float!) {
+          getFilesByProjectId(projectId: $projectId) {
+            id
+            name
+            id_storage_file
+            language
           }
-        `,
-        variables: { projectId },
-      })
-    ).data as ResGetFilesAndCode[];
+          getCodeFiles(projectId: $projectId) {
+            code
+            language
+            name
+            projectId
+          }
+        }
+      `,
+      variables: { projectId },
+    });
+
+    const allProjectFiles: ResGetFilesAndCode = {
+      getFilesByProjectId: data.getFilesByProjectId,
+      getCodeFiles: data.getCodeFiles,
+    };
 
     return allProjectFiles;
   },

@@ -9,31 +9,28 @@ export const userAPI = {
       await api.mutate({
         // mutation à refaire lorsque le back sera OP
         mutation: gql`
-          mutation Mutation(
-            $password: String!
-            $login: String!
-            $email: String!
-          ) {
-            createUser(password: $password, login: $login, email: $email) {
+          mutation CreateUser($data: CreateUser!) {
+            createUser(data: $data) {
               id
             }
           }
         `,
         variables: {
-          password: user.password,
-          login: user.login,
-          email: user.email,
+          data: {
+            email: user.email,
+            login: user.login,
+            password: user.password,
+          },
         },
       })
     ).data.createUser as IUser;
 
-    return { ...newUser, id: newUser.id.toString() };
+    return { ...newUser };
   },
 
   getAll: async (): Promise<IUser[]> => {
     const users = (
       await api.query({
-        // query à refaire lorsque le back sera OP
         query: gql`
           query Query {
             getAllUsers {
@@ -46,17 +43,27 @@ export const userAPI = {
           }
         `,
       })
-    ).data.getAllUsers as IUser<string>[];
+    ).data.getAllUsers as IUser[];
 
-    return users.map((user) => ({
-      ...user,
-      id: user.id.toString(),
-      date_start_subscription: user.date_start_subscription
-        ? new Date(user.date_start_subscription)
-        : undefined,
-      date_end_subscription: user.date_end_subscription
-        ? new Date(user.date_end_subscription)
-        : undefined,
-    }));
+    return users;
+  },
+  getUserById: async (): Promise<IUser> => {
+    const user = (
+      await api.query({
+        query: gql`
+          query Query {
+            getUserById {
+              id
+              email
+              login
+              date_end_subscription
+              date_start_subscription
+            }
+          }
+        `,
+      })
+    ).data.getUserById as IUser;
+
+    return user;
   },
 };
