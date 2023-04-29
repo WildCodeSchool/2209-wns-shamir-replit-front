@@ -19,9 +19,7 @@ const Layout = ({ children }: Children) => {
 
   return (
     <>
-      <div className={styles.layoutContainer}>
-        <div>{children}</div>
-      </div>
+      <div className={styles.layoutContainer}>{children}</div>
       {shareModal.projectId !== undefined && (
         <ShareModal closeShareModal={closeShareModal} />
       )}

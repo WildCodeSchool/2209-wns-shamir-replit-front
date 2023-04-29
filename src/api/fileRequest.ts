@@ -2,19 +2,15 @@ import { gql } from "@apollo/client";
 
 const fileRequest = {
   getFilesByProjectId: gql`
-    query GetFilesByProjectId(
-      $projectId: String!
-      $getCodeFilesProjectId2: String!
-    ) {
+    query GetFilesByProjectId($projectId: Float!) {
       getFilesByProjectId(projectId: $projectId) {
         id
+        name
         id_storage_file
         language
-        name
       }
-      getCodeFiles(projectId: $getCodeFilesProjectId2) {
+      getCodeFiles(projectId: $projectId) {
         code
-        id
         language
         name
         projectId

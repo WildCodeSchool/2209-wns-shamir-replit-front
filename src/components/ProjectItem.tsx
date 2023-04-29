@@ -38,7 +38,7 @@ const ProjectItem = ({
 
     if (projectId) {
       setProject(project);
-      setShareModal({ projectId: parseInt(projectId, 10) });
+      setShareModal({ projectId: projectId });
     }
   };
 
@@ -47,7 +47,7 @@ const ProjectItem = ({
 
     if (projectId) {
       setProject(project);
-      setDeleteModal({ projectId: parseInt(projectId, 10) });
+      setDeleteModal({ projectId: projectId });
     }
   };
 
@@ -56,11 +56,8 @@ const ProjectItem = ({
 
     const alreadyLiked =
       userId !== undefined &&
-      (
-        project.like?.filter(
-          (like) => like.userId.id === parseInt(userId, 10)
-        ) || []
-      ).length > 0;
+      (project.like?.filter((like) => like.user.id === userId) || []).length >
+        0;
 
     if (!alreadyLiked) await projectAPI.addLike(project.id);
     else await projectAPI.removeLike(project.id);

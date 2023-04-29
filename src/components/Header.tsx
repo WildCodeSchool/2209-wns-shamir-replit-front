@@ -1,10 +1,9 @@
-import React, { useContext, useEffect } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
 import styles from "./Header.module.scss";
 import ProjectContext from "../contexts/projectContext";
 import UserContext from "../contexts/userContext";
 import { projectAPI } from "../api/projectAPI";
-import { ILike } from "../interfaces/IProject";
 import ShareModalContext from "../contexts/shareModalContext";
 import { isLiked } from "../utils/isLiked";
 import { Avatar, Tooltip } from "@mui/material";
@@ -18,6 +17,7 @@ const Header = () => {
   const { setForceProjectListUpdate } = useContext(
     ForceProjectListUpdateContext
   );
+  const [state, setState] = useState<boolean>(false);
   // const client = useApolloClient();
   const navigate = useNavigate();
 
@@ -25,9 +25,7 @@ const Header = () => {
   // const userId = localStorage.getItem("userId");
 
   const handleToggleModal = () => {
-    const projectId = project.id;
-
-    if (projectId) setShareModal({ projectId: parseInt(projectId, 10) });
+    if (project.id) setShareModal({ projectId: project.id });
   };
 
   const getInitialFromLogin = (login: string | undefined) => {
@@ -45,49 +43,63 @@ const Header = () => {
   };
 
   const toggleLike = async () => {
-    const userId = user?.id;
-    const projectLike = project.like;
-
-    const alreadyLiked =
-      userId !== undefined &&
-      (
-        projectLike?.filter(
-          (like) => like.userId.id === parseInt(userId, 10)
-        ) || []
-      ).length > 0;
-
-    const projectId = project.id;
-
-    if (projectId && userId) {
-      if (!alreadyLiked) {
-        await projectAPI.addLike(projectId);
-
-        const newLike: ILike = { id: -1, userId: { id: parseInt(userId, 10) } };
-
-        setProject({
-          ...project,
-          like: projectLike ? [...projectLike, newLike] : [newLike],
-        });
-      } else {
-        await projectAPI.removeLike(projectId);
-
-        setProject({
-          ...project,
-          like: projectLike
-            ? projectLike.filter(
-                (like) => like.userId.id !== parseInt(userId, 10)
-              )
-            : [],
-        });
-      }
+    if (project.id) {
+      state
+        ? await projectAPI.addLike(project.id)
+        : await projectAPI.removeLike(project.id);
+      setState((prev) => !prev);
     }
   };
+  // const userId = user?.id;
+  // const projectLike = project.like;
+
+  // const alreadyLiked =
+  //   userId !== undefined &&
+  //   (projectLike?.filter((like) => like.user.id === userId) || []).length > 0;
+
+  // const projectId = project.id;
+
+  // if (projectId && userId) {
+  //   if (!alreadyLiked) {
+  //     await projectAPI.addLike(projectId);
+
+  //     const newLike: ILike = { id: -1, userId: { id: parseInt(userId, 10) } };
+
+  //     setProject({
+  //       ...project,
+  //       like: projectLike ? [...projectLike, newLike] : [newLike],
+  //     });
+  //   } else {
+  //     await projectAPI.removeLike(projectId);
+
+  //     setProject({
+  //       ...project,
+  //       like: projectLike
+  //         ? projectLike.filter(
+  //             (like) => like.userId.id !== parseInt(userId, 10)
+  //           )
+  //         : [],
+  //     });
+  //   }
+  // }
 
   const signOut = async () => {
     localStorage.setItem("token", "");
     localStorage.setItem("userId", "");
-    setUser({});
-    setProject({});
+    setUser({
+      id: 0,
+      email: "",
+      login: "",
+    });
+    setProject({
+      id: 0,
+      id_storage_number: "",
+      name: "",
+      description: "",
+      isPublic: false,
+      nb_views: 0,
+      file: [],
+    });
     setForceProjectListUpdate(true);
 
     navigate("/login");
@@ -96,18 +108,20 @@ const Header = () => {
   const updateUserContext = async () => {
     const localStorageUserId = localStorage.getItem("userId");
 
-    if (user.login === undefined && localStorageUserId) {
-      const reqUser = (await userAPI.getAll()).filter(
-        (u) => u.id === localStorageUserId
-      )[0];
+    if (localStorageUserId != null) {
+      const id = parseInt(localStorageUserId, 10);
 
-      setUser({ ...reqUser, id: localStorageUserId });
+      if (!user.login) {
+        const reqUser = (await userAPI.getAll()).filter((u) => u.id === id)[0];
+
+        setUser({ ...reqUser, id: id });
+      }
     }
   };
 
   useEffect(() => {
     updateUserContext();
-  }, [user]);
+  }, []);
 
   return (
     <>

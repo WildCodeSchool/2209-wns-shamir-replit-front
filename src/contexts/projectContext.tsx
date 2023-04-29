@@ -1,33 +1,34 @@
 import React, { createContext, useState, useMemo, ReactNode } from "react";
 import { IProject } from "../interfaces/IProject";
 
-const initProject: Partial<IProject> = {
-  id: undefined,
-  id_storage_number: undefined,
-  name: undefined,
-  description: undefined,
-  isPublic: undefined,
+const initProject: IProject = {
+  id: 0,
+  id_storage_number: "",
+  name: "",
+  description: "",
+  isPublic: false,
   like: [],
-  nb_views: undefined,
+  nb_views: 0,
   file: [],
 };
 
 type ProjectContextProviderProps = { children: ReactNode };
 type TypeContext = {
-  project: Partial<IProject>;
-  setProject: (c: Partial<IProject>) => void;
+  project: IProject;
+  setProject: (c: IProject) => void;
 };
 
 const ProjectContext = createContext<TypeContext>({
   project: initProject,
-  // eslint-disable-next-line @typescript-eslint/no-empty-function
-  setProject: () => {},
+  setProject: () => {
+    console.warn("setUser has not been implemented");
+  },
 });
 
 export function ProjectContextProvider({
   children,
 }: ProjectContextProviderProps) {
-  const [project, setProject] = useState<Partial<IProject>>(initProject);
+  const [project, setProject] = useState<IProject>(initProject);
   const value = useMemo(
     () => ({
       project,

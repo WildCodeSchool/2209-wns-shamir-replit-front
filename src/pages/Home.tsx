@@ -43,14 +43,22 @@ const Home = () => {
   };
 
   const token = localStorage.getItem("token");
-
   const handleArrowClick = (
     list: "myProjects" | "sharedProjects" | "allProjects"
   ) => {
-    if (list === "myProjects") setShowMyProjectList(!showMyProjectList);
-    if (list === "sharedProjects")
-      setShowSharedProjectList(!showSharedProjectList);
-    if (list === "allProjects") setShowAllProjectList(!showAllProjectList);
+    switch (list) {
+      case "myProjects":
+        setShowMyProjectList((x) => !x);
+        break;
+      case "sharedProjects":
+        setShowSharedProjectList((x) => !x);
+        break;
+      case "allProjects":
+        setShowAllProjectList((x) => !x);
+        break;
+      default:
+        break;
+    }
   };
 
   const handleSearch = (
@@ -72,11 +80,10 @@ const Home = () => {
 
   const getPublicProjects = async () => {
     const projects = await projectAPI.getPublic();
-
     setPublicProjects(projects);
   };
 
-  const createNewProject = async (project: Omit<CreateProject, "userId">) => {
+  const createNewProject = async (project: CreateProject) => {
     setShowNewProjectModal(false);
     await projectAPI.create(project);
     await getEveryProjects();
@@ -94,9 +101,9 @@ const Home = () => {
 
     const description = project.description.toLowerCase();
     const name = project.name.toLowerCase();
-    const rawLogin = project.userId?.login;
+    const rawLogin = project.user?.login;
     let login: string | undefined = undefined;
-    if (rawLogin) login = project.userId?.login.toLowerCase();
+    if (rawLogin) login = project.user?.login.toLowerCase();
 
     return (
       login?.includes(searchValue) ||
@@ -113,7 +120,7 @@ const Home = () => {
             .map((pro) => [
               pro.name,
               ...pro.description.split(" "),
-              pro.userId?.login,
+              pro.user?.login,
             ])
             .flat()
             .filter((word) => word && word.length > 2)
@@ -133,7 +140,15 @@ const Home = () => {
 
   useEffect(() => {
     setForceProjectListUpdate(true);
-    setProject({});
+    setProject({
+      id: 0,
+      id_storage_number: "",
+      name: "",
+      description: "",
+      isPublic: false,
+      nb_views: 0,
+      file: [],
+    });
   }, []);
 
   useEffect(() => {
@@ -142,136 +157,129 @@ const Home = () => {
 
   return (
     <>
-      <div>
-        <div>
-          <Autocomplete
-            value={searchValue}
-            onChange={handleSearch}
-            size="small"
-            options={getSearchFields()}
-            sx={{
-              width: "auto",
-              height: "auto",
-              fontSize: "12px",
-              font: "initial",
-              backgroundColor: "white",
-            }}
-            renderInput={(params) => (
-              <TextField
-                {...params}
-                label="recherche"
-                data-testid={`autoCompleteTextField`}
-              />
-            )}
-            ListboxProps={{ style: { fontSize: "12px" } }}
-            data-testid={`autoComplete`}
+      <Autocomplete
+        value={searchValue}
+        onChange={handleSearch}
+        size="small"
+        options={getSearchFields()}
+        sx={{
+          width: "40%",
+          fontSize: "12px",
+          font: "initial",
+        }}
+        renderInput={(params) => (
+          <TextField
+            {...params}
+            label="recherche"
+            data-testid={`autoCompleteTextField`}
           />
-        </div>
+        )}
+        ListboxProps={{ style: { fontSize: "12px" } }}
+        data-testid={`autoComplete`}
+      />
 
-        <section className={styles.section}>
-          <h2 onClick={() => handleArrowClick("myProjects")}>
-            <img
-              src="/triangle.svg"
-              alt="triangle"
-              className={[
-                styles.arrowDown,
-                showMyProjectList ? null : styles.arrowLeft,
-              ].join(" ")}
-            />
-            <span>My Projects</span>
-          </h2>
+      <section className={styles.section}>
+        <h2 onClick={() => handleArrowClick("myProjects")}>
+          <img
+            src="/triangle.svg"
+            alt="triangle"
+            className={[
+              styles.arrowDown,
+              showMyProjectList ?? styles.arrowLeft,
+            ].join(" ")}
+          />
+          <span>My Projects</span>
+        </h2>
 
-          <div className={styles.projectsContainer}>
-            {showMyProjectList === true && (
-              <>
-                {myProjects &&
-                  myProjects.length > 0 &&
-                  myProjects
-                    ?.filter(filterBySearch)
-                    .map((project) => (
-                      <ProjectItem
-                        key={project.id}
-                        project={project}
-                        owned={true}
-                        getEveryProjects={getEveryProjects}
-                      />
-                    ))}
-                <article
-                  className={styles.newProject}
-                  onClick={openNewProjectModal}
-                >
-                  <img
-                    src="/add-circle.svg"
-                    alt="add"
-                    className={styles.addIcon}
-                  />
-                  <span>new project</span>
-                </article>
-              </>
-            )}
-          </div>
-        </section>
-
-        <section className={styles.section}>
-          <h2 onClick={() => handleArrowClick("sharedProjects")}>
-            <img
-              src="/triangle.svg"
-              alt="triangle"
-              className={[
-                styles.arrowDown,
-                showSharedProjectList ? null : styles.arrowLeft,
-              ].join(" ")}
-            />
-            <span>Projects shared with me</span>
-          </h2>
-          {showSharedProjectList &&
-            sharedProjects &&
-            sharedProjects.length > 0 && (
-              <div className={styles.projectsContainer}>
-                {sharedProjects?.filter(filterBySearch).map((project) => (
-                  <ProjectItem
-                    key={project.id}
-                    project={project}
-                    owned={false}
-                    getEveryProjects={getEveryProjects}
-                  />
-                ))}
-              </div>
-            )}
-        </section>
-
-        <section className={styles.section}>
-          <h2 onClick={() => handleArrowClick("allProjects")}>
-            <img
-              src="/triangle.svg"
-              alt="triangle"
-              className={[
-                styles.arrowDown,
-                showAllProjectList ? null : styles.arrowLeft,
-              ].join(" ")}
-            />
-            <span>All public projects</span>
-          </h2>
-          {showAllProjectList &&
-            publicProjects &&
-            publicProjects.length > 0 && (
-              <div className={styles.projectsContainer}>
-                {publicProjects
+        <div className={styles.projectsContainer}>
+          {showMyProjectList === true && (
+            <>
+              {myProjects &&
+                myProjects.length > 0 &&
+                myProjects
                   ?.filter(filterBySearch)
-                  .filter((project) => project.userId?.id !== user.id)
                   .map((project) => (
                     <ProjectItem
                       key={project.id}
                       project={project}
-                      owned={false}
+                      owned={true}
                       getEveryProjects={getEveryProjects}
                     />
                   ))}
-              </div>
-            )}
-        </section>
-      </div>
-      {showNewProjectModal === true && (
+              <article
+                className={styles.newProject}
+                onClick={openNewProjectModal}
+              >
+                <img
+                  src="/add-circle.svg"
+                  alt="add"
+                  className={styles.addIcon}
+                />
+                <span>new project</span>
+              </article>
+            </>
+          )}
+        </div>
+      </section>
+
+      <section className={styles.section}>
+        <h2 onClick={() => handleArrowClick("sharedProjects")}>
+          <img
+            src="/triangle.svg"
+            alt="triangle"
+            className={[
+              styles.arrowDown,
+              showSharedProjectList ? null : styles.arrowLeft,
+            ].join(" ")}
+          />
+          <span>Projects shared with me</span>
+        </h2>
+        {showSharedProjectList &&
+          sharedProjects &&
+          sharedProjects.length > 0 && (
+            <div className={styles.projectsContainer}>
+              {sharedProjects?.filter(filterBySearch).map((project) => (
+                <ProjectItem
+                  key={project.id}
+                  project={project}
+                  owned={false}
+                  getEveryProjects={getEveryProjects}
+                />
+              ))}
+            </div>
+          )}
+      </section>
+
+      <section className={styles.section}>
+        <h2 onClick={() => handleArrowClick("allProjects")}>
+          <img
+            src="/triangle.svg"
+            alt="triangle"
+            className={[
+              styles.arrowDown,
+              showAllProjectList ? null : styles.arrowLeft,
+            ].join(" ")}
+          />
+          <span>All public projects</span>
+        </h2>
+        {showAllProjectList && publicProjects && publicProjects.length > 0 && (
+          <div className={styles.projectsContainer}>
+            {publicProjects
+              ?.filter(filterBySearch)
+              .filter((project) => project.user?.id !== user.id)
+              .map((project) => (
+                <ProjectItem
+                  key={project.id}
+                  project={project}
+                  owned={false}
+                  getEveryProjects={getEveryProjects}
+                />
+              ))}
+          </div>
+        )}
+      </section>
+
+      {showNewProjectModal && (
         <NewProjectModal
           createNewProject={createNewProject}
           closeNewProjectModal={closeNewProjectModal}

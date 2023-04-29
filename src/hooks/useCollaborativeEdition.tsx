@@ -43,11 +43,11 @@ const useCollaborativeEdition = ({
 
   const updateCoworkers = () => {
     if (editorRef.current) {
-      const uniqueCoworkers = [...coworkers.map((cw) => cw.userId)];
+      const uniqueCoworkers = [...coworkers.map((cw) => cw.user.id)];
 
       const decorations = uniqueCoworkers
-        .map((ucwId) => coworkers.filter((cw) => cw.userId === ucwId)[0])
-        .filter((cw) => cw.userId !== parseInt(user.id || "0"))
+        .map((ucwId) => coworkers.filter((cw) => cw.user.id === ucwId)[0])
+        .filter((cw) => cw.user.id !== (user.id || 0))
         .sort((cw1, cw2) => {
           if (cw1.name > cw2.name) return 1;
           if (cw1.name < cw2.name) return -1;
@@ -116,7 +116,7 @@ const useCollaborativeEdition = ({
         const coworker: Coworker = {
           name: user.login || "",
           project_id: projectId,
-          userId: parseInt(user.id || "0"),
+          user: user,
           startLineNumber: position.lineNumber,
           startColumn: position.column,
           endLineNumber: position.lineNumber,

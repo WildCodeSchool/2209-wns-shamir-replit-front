@@ -1,24 +1,26 @@
-export type IUserId = {
-  id: number;
-  login: string;
-  email: string;
-};
+import { IUser } from "./IUser";
+
+// export type IUserId = {
+//   id: number;
+//   login: string;
+//   email: string;
+// };
 
 export type ILike = {
   id: number;
-  userId: Pick<IUserId, "id">;
+  user: IUser;
 };
 
 export type IProjectShare = {
   id: number;
-  userId: IUserId;
+  user: IUser;
   comment: boolean;
   read: boolean;
   write: boolean;
 };
 
 export type IProject = {
-  id: string;
+  id: number;
   id_storage_number: string;
   name: string;
   description: string;
@@ -27,11 +29,10 @@ export type IProject = {
   projectShare?: IProjectShare[];
   nb_views: number;
   file: { language: string }[];
-  userId?: Omit<IUserId, "email">;
+  user?: IUser;
 };
 
 export type CreateProject = {
-  userId: number;
   name: string;
   description: string;
   isPublic: boolean;
